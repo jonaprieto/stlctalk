@@ -1,0 +1,5 @@
+name: stlc
+depend:
+  standard-library
+include:
+  src/

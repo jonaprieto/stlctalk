@@ -1,0 +1,6 @@
+name: stlc
+author: Jonathan Prieto-Cubides (based on the entire code of @gergoerdi)
+include:
+  - src/
+depend:
+  - standard-library
