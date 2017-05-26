@@ -1,10 +1,13 @@
 module Bound (Type : Set) where
 
+------------------------------------------------------------------------------
+
 open import Data.Nat hiding (_≟_)
 open import Data.Fin
 
 open import Syntax as S hiding (Expr; module Expr)
-open import Function using (_$_)
+
+------------------------------------------------------------------------------
 
 data Expr (n : ℕ) : Set where
   var : Fin n  → Expr n
@@ -34,7 +37,7 @@ s = lam A y
 λλλ→x : Expr 3
 λλλ→x = lam A (lam A (var (# 3)))
 
-
+------------------------------------------------------------------------------
 
 
 
