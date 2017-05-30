@@ -1,0 +1,348 @@
+\documentclass[10pt, xetex, hyperref={pdfpagelabels=false}]{beamer}
+
+% --------------------------------------------------------------------------
+% Packages
+% --------------------------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{bussproofs}
+\EnableBpAbbreviations
+\def\extraVskip{3pt}
+
+\usepackage{fancyvrb}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{lmodern}
+
+\usepackage{url}
+
+% --------------------------------------------------------------------------
+% Tikz Configuration
+% --------------------------------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usepackage{rotating}
+
+% --------------------------------------------------------------------------
+% My palette.
+% --------------------------------------------------------------------------
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+\definecolor{energy}{RGB}{49,247,250}
+\definecolor{delicate}{RGB}{67,179,223}
+\definecolor{faded}{RGB}{76,117,195}
+\definecolor{blu}{RGB}{1,0,102}
+\definecolor{plum}{RGB}{87,78,164}
+\definecolor{petunias}{RGB}{109,80,139}
+\definecolor{letour}{RGB}{101,41,105}
+% --------------------------------------------------------------------------
+
+% --------------------------------------------------------------------------
+% Beamer configuration.
+% --------------------------------------------------------------------------
+\usetheme{default}
+\usecolortheme{default}
+\usefonttheme{serif}
+
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{navigation symbols}{}
+\hypersetup{pdfpagemode=UseNone}
+
+% footer.
+\setbeamercolor{headFoot}{fg=white, bg=blu}
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}
+    [wd=.8\paperwidth,ht=2.3ex,dp=1ex,left]{headFoot}%
+    \hspace*{2ex}\textbf\insertshorttitle\hspace*{2mm}|
+    \hspace*{2mm}\textbf\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}
+    [wd=.2\paperwidth,ht=2.3ex,dp=1ex,right]{headFoot}%
+    \insertframenumber{}/\inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip 0pt%
+}
+
+\setbeamerfont{frametitle}{size=\small,series=\bfseries}
+\setbeamercolor{frametitle}{fg=white,bg=blu}
+
+\setbeamerfont{framesubtitle}{size=\normalfont\scriptsize}
+\setbeamercolor{framesubtitle}{fg=white, bg=blu}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black}
+
+% \setbeamercolor{institute}{fg=blu}
+\setbeamercolor{title}{fg=blu}
+% \setbeamercolor{subtitle}{fg=blu}
+
+% \setbeamercolor{titlelike}{fg=blu}
+\setbeamerfont{footnote}{size=\tiny}
+\setbeamercolor{footnote}{fg=gray}
+% \setbeamercolor{block title}{bg=blue,fg=blu}
+% \setbeamercolor{block body}{bg=aliceblue}
+% \setbeamercolor{item}{fg=blu} % color of bullets
+% \setbeamercolor{subitem}{fg=blu}
+% \setbeamercolor{itemize/enumerate subbody}{fg=blu}
+% \setbeamertemplate{itemize subitem}{{\textendash}}
+% \setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+% \setbeamerfont{itemize/enumerate subitem}{size=\footnotesize}
+
+% --------------------------------------------------------------------------
+% Fonts
+% --------------------------------------------------------------------------
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+\usepackage{fontspec}
+\usepackage{mathtools}
+\usepackage{unicode-math}
+
+\newfontfamily\djvu[ExternalLocation=fonts/
+  , BoldFont=DejaVuSansMono-Bold.ttf
+  , BoldItalicFont=DejaVuSansMono-BoldOblique.ttf
+  , ItalicFont=DejaVuSansMono-Oblique.ttf
+  ]{DejaVuSansMono.ttf}
+
+\setmonofont[ExternalLocation=fonts/
+, BoldFont=DejaVuSansMono-Bold.ttf
+, BoldItalicFont=DejaVuSansMono-BoldOblique.ttf
+, ItalicFont=DejaVuSansMono-Oblique.ttf
+]{DejaVuSansMono.ttf}
+
+\setmathfont[ExternalLocation=fonts/
+  ]{DejaVuMathTeXGyre.ttf}
+\newfontfamily\mathfont{fonts/DejaVuMathTeXGyre.ttf}
+
+\setmainfont[ExternalLocation=fonts/
+  , BoldFont=SourceSansPro-Semibold.otf
+  , BoldItalicFont=SourceSansPro-SemiboldIt.otf
+  , ItalicFont=SourceSansPro-It.otf
+  ]{SourceSansPro-Regular.otf}
+
+% \setmonofont[ExternalLocation=fonts/
+%   , BoldFont=SourceCodePro-Semibold.ttf
+%   , BoldItalicFont=SourceCodePro-SemiboldIt.ttf
+%   , ItalicFont=SourceCodePro-It.ttf
+%   ]{SourceCodePro-Regular.ttf}
+
+\newfontfamily\sourcecode[ExternalLocation=fonts/
+  , BoldFont=SourceCodePro-Semibold.ttf
+  , BoldItalicFont=SourceCodePro-SemiboldIt.ttf
+  , ItalicFont=SourceCodePro-It.ttf
+  ]{SourceCodePro-Regular.ttf}
+
+% --------------------------------------------------------------------------
+% Agda Source code
+% --------------------------------------------------------------------------
+
+\usepackage{minted}
+\setminted[cagda]{
+  bgcolor   = aliceblue
+, fontsize  = \footnotesize
+, frame     = none
+% , framerule = 0.4pt
+% , framesep  = 0pt
+, style     = cagda
+}
+
+% --------------------------------------------------------------------------
+% References
+% --------------------------------------------------------------------------
+
+\usepackage[autostyle]{csquotes}
+\usepackage[
+    backend=biber
+  , doi=false
+  , eprint=false
+  , isbn=false
+  , natbib=true
+  , sortlocale=en_US
+  , style=authoryear-icomp
+  , url=false
+]{biblatex}
+\addbibresource{ref.bib}
+\renewcommand*{\nameyeardelim}{\addcomma\addspace}
+\usepackage{silence}
+\WarningFilter{biblatex}{Patching footnotes failed}
+\WarningFilter{hyperref}{Token not allowed in a PDF string}
+
+% --------------------------------------------------------------------------
+% Title and Author
+% --------------------------------------------------------------------------
+
+\title[The Simply Typed $\lambda$-Calculus]{The Simply Typed $\lambda$-Calculus}
+
+\subtitle{(In \texttt{Agda})}
+\date{\footnotesize 1th June 2017}
+\author[Jonathan Prieto-Cubides]{Jonathan Prieto-Cubides}
+\institute{
+Master in Applied Mathematics\\
+Logic and Computation Group\\
+Universidad EAFIT\\
+Medell\'in, Colombia}
+% --------------------------------------------------------------------------
+
+\newsavebox\agdapragma
+
+\begin{document}
+\setcounter{page}{1}
+
+\begin{frame}[plain]
+\titlepage
+  \begin{tikzpicture}[overlay, remember picture]
+   \tikzset{shift={(current page.center)}}
+    \node[xshift=0cm,yshift=-3.2cm] (eafit)
+      {\includegraphics[width=0.2\textwidth]{figures/eafit}};
+  \end{tikzpicture}
+\end{frame}
+
+
+\begin{frame}[fragile]{Syntax Based on ~\citep{cactus}, and \citep{nad}}
+\vfill
+\begin{minted}{cagda}
+module Typing (U : Set) where
+
+data Type : Set where
+  base : U    → Type
+  _⟶_  : Type → Type → Type
+\end{minted}
+
+\vfill
+{\color{plum!45!black}\rule{\textwidth}{0.5pt}}
+\vfill
+
+\begin{minted}{cagda}
+module Syntax (Type : Set) where
+
+open import Data.String
+
+Name : Set
+Name = String
+
+-- Type Judgments (x ∶ A).
+data Formal : Set where
+  _∶_ : Name → Type → Formal
+
+data Expr : Set where
+  var : Name   → Expr
+  lam : Formal → Expr → Expr
+  _∙_ : Expr   → Expr → Expr
+\end{minted}
+\vfill
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{module Examples (Type : Set) where}}
+\begin{minted}{cagda}
+open import Syntax Type
+
+postulate A : Type
+
+x = var "x"
+y = var "y"
+z = var "z"
+
+-- I, K, S : Expr
+
+I = lam ("x" ∶ A) x                  -- λx.x, x ∈ A
+K = lam ("x" ∶ A) (lam ("y" ∶ A) x)  -- λxy.x, x,y ∈ A
+S =
+  lam ("x" ∶ A)
+    (lam ("y" ∶ A)
+      (lam ("z" ∶ A)
+        ((x ∙ z) ∙ (y ∙ z))))        -- λxyz.xz(yz), x,y,z ∈ A
+\end{minted}
+\end{frame}
+
+
+\begin{frame}[fragile]{module Bound (Type : Set) where}
+% Well-scoped Expresions with respect to a variable Binder.
+\begin{minted}{cagda}
+data Expr (n : ℕ) : Set where
+  var : Fin n  → Expr n
+  lam : Type   → Expr (suc n) → Expr n
+  _∙_ : Expr n → Expr n       → Expr n
+
+Binder : ℕ → Set
+Binder = Vec Name
+
+data _⊢_⇝_ : ∀ {n} → Binder n → S.Expr → Expr n → Set where
+  var-zero : ∀ {n x} {Γ : Binder n}
+           → Γ , x ⊢ var x ⇝ var (# 0)
+
+  var-suc  : ∀ {n x y k} {Γ : Binder n} {p : False (x ≟ y)}
+           → Γ ⊢ var x ⇝ var k
+           → Γ , y ⊢ var x ⇝ var (suc k)
+
+  lam      : ∀ {n x τ t t′} {Γ : Binder n}
+           → Γ , x ⊢ t ⇝ t′
+           → Γ ⊢ lam (x ∶ τ) t ⇝ lam τ t′
+
+  _∙_      : ∀ {n t₁ t₁′ t₂ t₂′} {Γ : Binder n}
+           → Γ ⊢ t₁ ⇝ t₁′
+           → Γ ⊢ t₂ ⇝ t₂′
+           → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{minted}{cagda}
+∅ : Binder 0
+∅ = []
+
+Γ : Binder 2
+Γ = "x" ∷ "y" ∷ []
+
+e1 : "x" ∷ "y" ∷ [] ⊢ var "x" ⇝ var (# 0)
+e1 = var-zero
+
+I : [] ⊢ lam ("x" ∶ A) (var "x")
+       ⇝ lam A (var (# 0))
+I = lam var-zero
+
+K : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "x"))
+       ⇝ lam A (lam A (var (# 1)))
+K = lam (lam (var-suc var-zero))
+
+K₂ : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "y"))
+        ⇝ lam A (lam A (var (# 0)))
+K₂ = lam (lam var-zero)
+
+P : Γ ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (lam ("z" ∶ A) (var "x")))
+       ⇝ lam A (lam A (lam A (var (# 2))))
+P = {!!}
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{module Typing (U : Set) where}}
+\begin{minted}{cagda}
+open import Bound Type hiding (_,_)
+
+Ctxt : ℕ → Set
+Ctxt = Vec Type
+
+_,_ : ∀ {n} → Ctxt n → Type → Ctxt (suc n)
+Γ , x = x ∷ Γ
+
+data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
+  tVar : ∀ {n Γ} {x : Fin n}
+       → Γ ⊢ var x ∶ lookup x Γ
+
+  tLam : ∀ {n} {Γ : Ctxt n} {t} {τ τ′}
+       → Γ , τ ⊢ t ∶ τ′
+       → Γ ⊢ lam τ t ∶ τ ⟶ τ′
+
+  _∙_  :  ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
+       → Γ ⊢ t₁ ∶ τ ⟶ τ′
+       → Γ ⊢ t₂ ∶ τ
+       → Γ ⊢ t₁ ∙ t₂ ∶ τ′
+\end{minted}
+\end{frame}
+
+% \begin{frame}[allowframebreaks]{References}
+% \printbibliography
+% \end{frame}
+
+
+\end{document}
