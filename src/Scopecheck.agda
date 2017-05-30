@@ -88,6 +88,15 @@ find-name (y ∷ Γ) x with x ≟ y
     ...    | inj₁ x≡y                     = x≢y x≡y
     ...    | inj₂ p@(t′ -and- Γ⊢varx⇝t′) = ∄t⟨Γ⊢varx⇝t⟩ p
 
+check : ∀ {n}
+      → (Γ : Binder n)
+      → (t : S.Expr)
+      → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
+check Γ (var x)   = find-name Γ x
+check Γ (lam (x ∶ τ) t) with check (Γ , x) t
+... | z = ?
+check Γ (t ∙ t₁)  = {!!}
+
 -- check : ∀ {n} → (Γ : Binder n) → (E : S.Expr) → Dec (∃[ E′ ] Γ ⊢ E ↝ E′)
 -- check Γ (var x) = find-name Γ x
 -- check Γ (lam (x ∶ τ) E) with check (x ∷ Γ) E
