@@ -66,7 +66,7 @@ name-dec {n} {Γ} {x} {y}  {.(var (suc k))} (var-suc {n = .n} {x = .x} {y = .y} 
 find-name : ∀ {n}
           → (Γ : Binder n)
           → (x : Name)
-          → Dec (∃[ t′ ] (Γ ⊢ var x ⇝ t′))
+          → Dec (∃[ t ] (Γ ⊢ var x ⇝ t))
 find-name [] x = no lem
   where
     lem : ∄[ t ] ([] ⊢ var x ⇝ t)
@@ -94,7 +94,7 @@ check : ∀ {n}
       → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
 check Γ (var x)   = find-name Γ x
 check Γ (lam (x ∶ τ) t) with check (Γ , x) t
-... | z = ?
+... | z = {!!}
 check Γ (t ∙ t₁)  = {!!}
 
 -- check : ∀ {n} → (Γ : Binder n) → (E : S.Expr) → Dec (∃[ E′ ] Γ ⊢ E ↝ E′)

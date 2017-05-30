@@ -310,7 +310,7 @@ K₂ : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "y"))
 K₂ = lam (lam var-zero)
 
 P : Γ ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (lam ("z" ∶ A) (var "x")))
-       ⇝ lam A (lam A (lam A (var (# 2))))
+      ⇝ lam A (lam A (lam A (var (# 2))))
 P = {!!}
 \end{minted}
 \end{frame}
@@ -333,7 +333,7 @@ data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
        → Γ , τ ⊢ t ∶ τ′
        → Γ ⊢ lam τ t ∶ τ ⟶ τ′
 
-  _∙_  :  ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
+  _∙_  : ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
        → Γ ⊢ t₁ ∶ τ ⟶ τ′
        → Γ ⊢ t₂ ∶ τ
        → Γ ⊢ t₁ ∙ t₂ ∶ τ′

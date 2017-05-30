@@ -8,8 +8,8 @@ data Type : Set where
 
 open import Bound Type hiding (_,_)
 open import Data.Nat using (ℕ; suc)
-open import Data.Vec using (Vec; _∷_; lookup)
-open import Data.Fin using (Fin)
+open import Data.Vec using (Vec; _∷_; lookup; [])
+open import Data.Fin using (Fin; #_)
 
 ------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
        → Γ , τ ⊢ t ∶ τ′
        → Γ ⊢ lam τ t ∶ τ ⟶ τ′
 
-  _∙_  :  ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
+  _∙_  : ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
        → Γ ⊢ t₁ ∶ τ ⟶ τ′
        → Γ ⊢ t₂ ∶ τ
        → Γ ⊢ t₁ ∙ t₂ ∶ τ′
@@ -37,3 +37,28 @@ data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
 infixr 30 _⟶_
 infixl 20 _∙_
 infixl 20 _⊢_∶_
+
+
+-- Examples
+
+postulate
+  Bool : Type
+
+ex : [] , Bool ⊢ var (# 0) ∶ Bool
+ex = tVar
+
+ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ⟶ Bool
+ex2 = tLam tVar
+
+postulate
+  Word : Type
+  Num  : Type
+
+-- K : [] ⊢ lam Word (lam Num (var (# 0))) ∶ Word ⟶ Num ⟶ Bool
+K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ⟶ Num ⟶ Word
+K = tLam (tLam tVar)
+
+S : [] ⊢ lam (Word ⟶ Num) (lam (Word ⟶ Bool) (lam Bool ((var (# 2)) ∙ (var (# 0))) ∙ ((var (# 1)) ∙ (var (# 0))) ))
+       ∶ (Word ⟶ Num) ⟶ (Word ⟶ Bool) ⟶ Bool
+S = tLam (tLam (tLam ({!!} ∙ {!!}) ∙ ({!!} ∙ {!!})))
+
