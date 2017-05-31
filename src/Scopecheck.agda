@@ -46,20 +46,20 @@ syntax ∃-syntax (λ x → B) = ∃[ x ] B
 syntax ∄-syntax (λ x → B) = ∄[ x ] B
 --
 
-
 name-dec : ∀ {n} {Γ : Binder n} {x y : Name} {t : Expr (suc n)}
          → Γ , y ⊢ var x ⇝ t
          → x ≡ y ⊎ ∃[ t′ ] (Γ ⊢ var x ⇝ t′)
 
-name-dec {n} {Γ} {x} {.x} {.(var (# 0))} var-zero = inj₁ refl
-name-dec {n} {Γ} {x} {y}  {.(var (suc k))} (var-suc {n = .n} {x = .x} {y = .y} {k} {Γ = .Γ} {p} Γ,y⊢varx⇝vark)
+name-dec {n}{Γ}{x}{.x} {.(var (# 0))} var-zero = inj₁ refl
+name-dec {n}{Γ}{x}{y}  {.(var (suc k))}
+  (var-suc {n = .n} {x = .x} {y = .y} {k} {Γ = .Γ} {p} Γ,y⊢varx⇝vark)
   = inj₂ (var k -and- Γ,y⊢varx⇝vark)
       --   ↪ witness for t₂
 
 ⊢subst : ∀ {n} {x y} {Γ : Binder n} {t}
-        → x ≡ y
-        → Γ , x ⊢ var x ⇝ t
-        → Γ , y ⊢ var x ⇝ t
+       → x ≡ y
+       → Γ , x ⊢ var x ⇝ t
+       → Γ , y ⊢ var x ⇝ t
 ⊢subst {n}{x}{y}{Γ}{t} x≡y Γ,x⊢varx⇝t =
        subst (λ z → z ∷ Γ ⊢ var x ⇝ t) x≡y Γ,x⊢varx⇝t
 
@@ -75,26 +75,34 @@ find-name [] x = no lem
 find-name (y ∷ Γ) x with x ≟ y
 ... | yes x≡y = yes (var (# 0) -and- ⊢subst x≡y var-zero)
 ... | no  x≢y
-      with find-name Γ x
-...      | yes (var k   -and- δ) =
-                yes $ var (suc k) -and- var-suc {p = fromWitnessFalse x≢y} δ
-...      | yes (lam _ _ -and- ())
-...      | yes (_ ∙ _   -and- ())
-...      | (no ∄t⟨Γ⊢varx⇝t⟩) = no lem
-  where
-    lem : ∄[ t ] (Γ , y ⊢ var x ⇝ t)
-    lem (t -and- Γ,y⊢varx⇝t)
-        with name-dec Γ,y⊢varx⇝t
-    ...    | inj₁ x≡y                     = x≢y x≡y
-    ...    | inj₂ p@(t′ -and- Γ⊢varx⇝t′) = ∄t⟨Γ⊢varx⇝t⟩ p
+  with find-name Γ x
+...  | yes (var k   -and- δ) =
+           yes $ var (suc k) -and- var-suc {p = fromWitnessFalse x≢y} δ
+...  | yes (lam _ _ -and- ())
+...  | yes (_ ∙ _   -and- ())
+...  | (no ∄t⟨Γ⊢varx⇝t⟩) = no lem
+     where
+       lem : ∄[ t ] (Γ , y ⊢ var x ⇝ t)
+       lem (t -and- Γ,y⊢varx⇝t)
+         with name-dec Γ,y⊢varx⇝t
+       ...  | inj₁ x≡y                     = x≢y x≡y
+       ...  | inj₂ p@(t′ -and- Γ⊢varx⇝t′) = ∄t⟨Γ⊢varx⇝t⟩ p
 
 check : ∀ {n}
       → (Γ : Binder n)
       → (t : S.Expr)
       → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
 check Γ (var x)   = find-name Γ x
-check Γ (lam (x ∶ τ) t) with check (Γ , x) t
-... | z = {!!}
+check Γ (lam (x ∶ τ) t)
+  with check (Γ , x) t
+...  | yes (t′ -and- Γ,x⊢t⇝t′) = yes ((lam τ t′) -and- lam Γ,x⊢t⇝t′)
+...  | no ∄t′⟨Γ,x⊢t⇝t′⟩ = no lem
+     where
+       lem : ∄[ t′ ] (Γ ⊢ lam (x ∶ τ) t ⇝ t′)
+       lem (var x′ -and- ())
+       lem (_ ∙ _  -and- ())
+       lem (lam .τ t′ -and- lam Γ,x⊢t⇝t′) = ∄t′⟨Γ,x⊢t⇝t′⟩ (t′ -and- Γ,x⊢t⇝t′)
+
 check Γ (t ∙ t₁)  = {!!}
 
 -- check : ∀ {n} → (Γ : Binder n) → (E : S.Expr) → Dec (∃[ E′ ] Γ ⊢ E ↝ E′)

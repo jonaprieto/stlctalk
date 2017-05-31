@@ -81,10 +81,10 @@
 % \setbeamercolor{titlelike}{fg=blu}
 \setbeamerfont{footnote}{size=\tiny}
 \setbeamercolor{footnote}{fg=gray}
-% \setbeamercolor{block title}{bg=blue,fg=blu}
+\setbeamercolor{block title}{bg=white,fg=blu}
 % \setbeamercolor{block body}{bg=aliceblue}
-% \setbeamercolor{item}{fg=blu} % color of bullets
-% \setbeamercolor{subitem}{fg=blu}
+\setbeamercolor{item}{fg=blu} % color of bullets
+\setbeamercolor{subitem}{fg=blu}
 % \setbeamercolor{itemize/enumerate subbody}{fg=blu}
 % \setbeamertemplate{itemize subitem}{{\textendash}}
 % \setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
@@ -199,6 +199,90 @@ Medell\'in, Colombia}
 \end{frame}
 
 
+\begin{frame}{Contents}
+\tableofcontents
+\end{frame}
+
+\section{Lambda Calculus}
+\begin{frame}[fragile]{$\lambda$-Calculus}
+\begin{definition}
+The set of $\lambda$-terms denoted by $\Lambda$ is built up
+from a set of variables $V$ using application and (function) abstraction.
+\begin{align*}
+x\in V                  &\Rightarrow x\in \Lambda, \\
+M\in \Lambda, x\in V    &\Rightarrow (\lambda x. M) \in \Lambda,\\
+M, N\in \Lambda         &\Rightarrow (MN) \in \Lambda, \\
+M, N\in \Lambda, x\in V &\Rightarrow ((\lambda x. M)\,N) \in \Lambda.
+\end{align*}
+\end{definition}
+\pause
+\begin{minted}{cagda}
+Name : Set
+Name = String
+
+data Expr : Set where
+  var : Name → Expr
+  lam : Name → Expr → Expr
+  _∙_ : Expr → Expr → Expr
+\end{minted}
+
+\end{frame}
+
+\section{Typed Lambda Calculus}
+\begin{frame}{$\lambda\rightarrow$-Curry System}
+\begin{definition}
+
+\begin{columns}
+  \begin{column}{0.5\textwidth}
+    \begin{prooftree}
+    \AxiomC{$M : σ ⟶ τ$}
+    \AxiomC{$N : σ$}
+    \BinaryInfC{$MN : τ$}
+    \end{prooftree}
+  \end{column}
+  \begin{column}{0.5\textwidth}
+    \begin{prooftree}
+    \AxiomC{$[x : \sigma]^1$}
+    \UnaryInfC{$\vdots$}
+    \UnaryInfC{$M : \tau$}
+    \RightLabel{$\not\_1$}
+    \UnaryInfC{$λx.M : σ → \tau$}
+    \end{prooftree}
+  \end{column}
+\end{columns}
+
+\end{definition}
+\end{frame}
+
+\section{Decibility of Type Assignment}
+\begin{frame}{Decibility of Type Assignment~\citep{barendregt2013lambda}}
+% \begin{equation*}
+% Γ ⊢ M : τ
+% \end{equation*}
+\begin{tabular}{ll}
+{\color{blu} \textbf{Problem}} & {\color{blu} \textbf{Question}} \\
+{\color{blu} Type-checking}    & Given $M$ and $τ$, $Γ⊢ M : τ$?  \\
+{\color{blu} Typability}       & Given $M$ does exists a $σ$, $Γ⊢ M : σ$? \\
+{\color{blu} Inhabitation}     & Given $τ$, does exists an $M$ such that $Γ⊢ M : σ$?\\
+\end{tabular}
+
+\begin{theorem}
+\begin{itemize}
+\item It is decidable whether a term is typable in $\lambda\rightarrow$.
+\item If a term $M$ is typable in $\lambda\rightarrow$, then M has a principal type scheme, i.e.
+a type $σ$ such that every possible type for $M$ is a subsitution instance of $σ$.
+Moreover $σ$ is computable from $M$.
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}
+Type checking for $\lambda\rightarrow$ is decidable.
+\end{theorem}
+
+\end{frame}
+
+
+\section{Syntax}
 \begin{frame}[fragile]{Syntax Based on ~\citep{cactus}, and \citep{nad}}
 \vfill
 \begin{minted}{cagda}
@@ -255,7 +339,7 @@ S =
 \end{minted}
 \end{frame}
 
-
+\section{Well-Scoped Expressions}
 \begin{frame}[fragile]{module Bound (Type : Set) where}
 % Well-scoped Expresions with respect to a variable Binder.
 \begin{minted}{cagda}
@@ -315,6 +399,7 @@ P = {!!}
 \end{minted}
 \end{frame}
 
+\section{Typing}
 \begin{frame}[fragile]{\texttt{module Typing (U : Set) where}}
 \begin{minted}{cagda}
 open import Bound Type hiding (_,_)
