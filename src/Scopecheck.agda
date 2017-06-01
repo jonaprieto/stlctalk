@@ -10,7 +10,7 @@ open import Data.Fin using (Fin; suc; #_)
 open import Data.Vec using ([]; _∷_)
 open import Data.String using (_≟_)
 
-open import Relation.Nullary.Decidable using (fromWitnessFalse)
+open import Relation.Nullary.Decidable using (fromWitnessFalse; toWitness; True)
 open import Relation.Nullary using (Dec; no; yes)
 -- open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
@@ -22,17 +22,6 @@ open import Data.Sum using (_⊎_; inj₁ ; inj₂)
 -- open import Utils
 
 ------------------------------------------------------------------------------
-
-appˡ : ∀ {n} {Γ : Binder n} {t₁ t₂ t₁′ t₂′}
-     → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
-     → Γ ⊢ t₁ ⇝ t₁′
-appˡ (δ ∙ _) = δ
-
-appʳ  : ∀ {n} {Γ : Binder n} {t₁ t₂ t₁′ t₂′}
-      → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
-      → Γ ⊢ t₂ ⇝ t₂′
-appʳ (_ ∙ δ) = δ
-
 
 --
 ∃-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set _
@@ -70,14 +59,14 @@ find-name : ∀ {n}
 find-name [] x = no lem
   where
     lem : ∄[ t ] ([] ⊢ var x ⇝ t)
-    lem (_ -and- ())   -- TODO
+    lem (_ -and- ())
 
 find-name (y ∷ Γ) x with x ≟ y
 ... | yes x≡y = yes (var (# 0) -and- ⊢subst x≡y var-zero)
 ... | no  x≢y
   with find-name Γ x
-...  | yes (var k   -and- δ) =
-           yes $ var (suc k) -and- var-suc {p = fromWitnessFalse x≢y} δ
+...  | yes (var k   -and- δ)
+       = yes $ var (suc k) -and- var-suc {p = fromWitnessFalse x≢y} δ
 ...  | yes (lam _ _ -and- ())
 ...  | yes (_ ∙ _   -and- ())
 ...  | (no ∄t⟨Γ⊢varx⇝t⟩) = no lem
@@ -92,45 +81,50 @@ check : ∀ {n}
       → (Γ : Binder n)
       → (t : S.Expr)
       → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
-check Γ (var x)   = find-name Γ x
+check Γ (var x) = find-name Γ x
+
 check Γ (lam (x ∶ τ) t)
   with check (Γ , x) t
-...  | yes (t′ -and- Γ,x⊢t⇝t′) = yes ((lam τ t′) -and- lam Γ,x⊢t⇝t′)
-...  | no ∄t′⟨Γ,x⊢t⇝t′⟩ = no lem
+...  | yes (t′ -and- Γ,x⊢t⇝t′)
+       = yes ((lam τ t′) -and- lam Γ,x⊢t⇝t′)
+...  | no ∄t′⟨Γ,x⊢t⇝t′⟩         = no lem
      where
        lem : ∄[ t′ ] (Γ ⊢ lam (x ∶ τ) t ⇝ t′)
        lem (var x′ -and- ())
        lem (_ ∙ _  -and- ())
-       lem (lam .τ t′ -and- lam Γ,x⊢t⇝t′) = ∄t′⟨Γ,x⊢t⇝t′⟩ (t′ -and- Γ,x⊢t⇝t′)
+       lem (lam .τ t′ -and- lam Γ,x⊢t⇝t′)
+         = ∄t′⟨Γ,x⊢t⇝t′⟩ (t′ -and- Γ,x⊢t⇝t′)
 
-check Γ (t ∙ t₁)  = {!!}
+check Γ (t₁ ∙ t₂)
+  with check Γ t₁ | check Γ t₂
+... | yes (t₁′ -and- Γ⊢t₁⇝t₁′) | (yes (t₂′ -and- Γ⊢t₂⇝t₂′))
+      = yes (t₁′ ∙ t₂′ -and- Γ⊢t₁⇝t₁′ ∙ Γ⊢t₂⇝t₂′)
+... | yes (t₁′ -and- Γ⊢t₁⇝t₁′) | (no ∄t⟨Γ⊢t₂⇝t⟩) = no lem
+    where
+      appʳ  : ∀ {n} {Γ : Binder n} {t₁ t₂ t₁′ t₂′}
+            → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
+            → Γ ⊢ t₂ ⇝ t₂′
+      appʳ (_ ∙ δ) = δ
 
--- check : ∀ {n} → (Γ : Binder n) → (E : S.Expr) → Dec (∃[ E′ ] Γ ⊢ E ↝ E′)
--- check Γ (var x) = find-name Γ x
--- check Γ (lam (x ∶ τ) E) with check (x ∷ Γ) E
--- check Γ (lam (x ∶ τ) E) | yes (E′ , δ) = yes (lam _ E′ , lam δ)
--- check Γ (lam (x ∶ τ) E) | no ¬p = no lem
---   where
---   lem : ∄[ E′ ] Γ ⊢ lam (x ∶ τ) E ↝ E′
---   lem (var _ , ())
---   lem (_ · _ , ())
---   lem (lam .τ E′ , lam δ) = ¬p (E′ , δ)
--- check Γ (E · F) with check Γ E
--- check Γ (E · F) | yes (E′ , δ₁) with check Γ F
--- check Γ (E · F) | yes (E′ , δ₁) | yes (F′ , δ₂) = yes (E′ · F′ , δ₁ · δ₂)
--- check Γ (E · F) | yes (E′ , δ₁) | no ¬p = no lem
---   where
---   lem : ∄[ E′ ] Γ ⊢ E · F ↝ E′
---   lem (var _ , ())
---   lem (lam _ _ , ())
---   lem (E₁ · E₂ , δ) = ¬p (E₂ , appʳ δ)
--- check Γ (E · F) | no ¬p = no lem
---   where
---   lem : ∄[ E′ ] Γ ⊢ (E · F) ↝ E′
---   lem (var _ , ())
---   lem (lam _ _ , ())
---   lem (E₁ · E₂ , δ) = ¬p (E₁ , appˡ δ)
+      lem : ∄[ t ] (Γ ⊢ t₁ ∙ t₂ ⇝ t)
+      lem (var _ -and- ())
+      lem (lam _ _ -and- ())
+      lem (t₁″ ∙ t₂″ -and- Γ⊢t₁∙t₂⇝t)
+        = ∄t⟨Γ⊢t₂⇝t⟩ (t₂″ -and- appʳ Γ⊢t₁∙t₂⇝t)
 
--- -- Go from a representation that uses Names to one that uses de Bruijn indices
--- scope : (E : S.Expr) → {p : True (check [] E)} → Expr 0
--- scope E {p} = proj₁ (toWitness p)
+... | no ∄t⟨Γ⊢t₁⇝t⟩  | _ = no lem
+    where
+      appˡ : ∀ {n} {Γ : Binder n} {t₁ t₂ t₁′ t₂′}
+        → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
+        → Γ ⊢ t₁ ⇝ t₁′
+      appˡ (δ ∙ _) = δ
+
+      lem : ∄[ t₁′ ] (Γ ⊢ (t₁ ∙ t₂) ⇝ t₁′)
+      lem (var _ -and- ())
+      lem (lam _ _ -and- ())
+      lem (t₁″ ∙ t₂″ -and- Γ⊢t₁∙t₂⇝t)
+        = ∄t⟨Γ⊢t₁⇝t⟩ (t₁″ -and- appˡ Γ⊢t₁∙t₂⇝t)
+
+-- Go from a representation that uses Names to one that uses de Bruijn indices
+scope : (t : S.Expr) → {p : True (check [] t)} → Expr 0
+scope t {p} = proj₁ (toWitness p)
