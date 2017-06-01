@@ -2,38 +2,34 @@ module Scopecheck (Type : Set) where
 
 ------------------------------------------------------------------------------
 
-open import Syntax Type as S hiding (Expr; module Expr)
 open import Bound Type
 
-open import Data.Nat hiding (_≟_)
-open import Data.Fin using (Fin; suc; #_)
-open import Data.Vec using ([]; _∷_)
-open import Data.String using (_≟_)
-
-open import Relation.Nullary.Decidable using (fromWitnessFalse; toWitness; True)
-open import Relation.Nullary using (Dec; no; yes)
--- open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
+open import Data.Fin     using (Fin; suc; #_)
+open import Data.Nat     hiding (_≟_)
 open import Data.Product renaming (_,_ to _-and-_)
 open import Data.Product using (∃; ∄)
+open import Data.String  using (_≟_)
+open import Data.Sum     using (_⊎_; inj₁ ; inj₂)
+open import Data.Vec     using (Vec; []; _∷_)
 
-open import Function using (_$_)
-open import Data.Sum using (_⊎_; inj₁ ; inj₂)
--- open import Utils
+open import Function     using (_$_)
+
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
+open import Relation.Nullary           using (Dec; no; yes)
+open import Relation.Nullary.Decidable
+  using (fromWitnessFalse; fromWitness; toWitness; True)
+
+open import Syntax Type as S hiding (Expr; module Expr)
 
 ------------------------------------------------------------------------------
 
---
 ∃-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set _
 ∃-syntax = ∃
-
 syntax ∃-syntax (λ x → B) = ∃[ x ] B
 
 ∄-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set _
 ∄-syntax = ∄
-
 syntax ∄-syntax (λ x → B) = ∄[ x ] B
---
 
 name-dec : ∀ {n} {Γ : Binder n} {x y : Name} {t : Expr (suc n)}
          → Γ , y ⊢ var x ⇝ t
@@ -43,14 +39,14 @@ name-dec {n}{Γ}{x}{.x} {.(var (# 0))} var-zero = inj₁ refl
 name-dec {n}{Γ}{x}{y}  {.(var (suc k))}
   (var-suc {n = .n} {x = .x} {y = .y} {k} {Γ = .Γ} {p} Γ,y⊢varx⇝vark)
   = inj₂ (var k -and- Γ,y⊢varx⇝vark)
-      --   ↪ witness for t₂
+--          ↪ witness
 
 ⊢subst : ∀ {n} {x y} {Γ : Binder n} {t}
        → x ≡ y
        → Γ , x ⊢ var x ⇝ t
        → Γ , y ⊢ var x ⇝ t
-⊢subst {n}{x}{y}{Γ}{t} x≡y Γ,x⊢varx⇝t =
-       subst (λ z → z ∷ Γ ⊢ var x ⇝ t) x≡y Γ,x⊢varx⇝t
+⊢subst {n}{x}{y}{Γ}{t} x≡y Γ,x⊢varx⇝t
+ = subst (λ z → Γ , z ⊢ var x ⇝ t) x≡y Γ,x⊢varx⇝t
 
 find-name : ∀ {n}
           → (Γ : Binder n)
@@ -81,8 +77,8 @@ check : ∀ {n}
       → (Γ : Binder n)
       → (t : S.Expr)
       → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
-check Γ (var x) = find-name Γ x
 
+check Γ (var x) = find-name Γ x
 check Γ (lam (x ∶ τ) t)
   with check (Γ , x) t
 ...  | yes (t′ -and- Γ,x⊢t⇝t′)
@@ -128,3 +124,37 @@ check Γ (t₁ ∙ t₂)
 -- Go from a representation that uses Names to one that uses de Bruijn indices
 scope : (t : S.Expr) → {p : True (check [] t)} → Expr 0
 scope t {p} = proj₁ (toWitness p)
+
+
+-- Examples.
+
+-- postulate
+--   A : Type
+
+-- I₁ : S.Expr
+-- I₁ = S.lam ("x" ∶ A) (S.var "x")
+
+-- open import Data.Unit
+
+-- I : Expr 0
+-- I = scope I₁ {p = ⊤.tt}
+
+postulate A : Type
+x : S.Expr
+x = var "x"
+
+y : S.Expr
+y = var "y"
+
+z : S.Expr
+z = var "z"
+
+S₁ : S.Expr
+S₁ =
+  lam ("x" ∶ A)
+    (lam ("y" ∶ A)
+    (lam ("z" ∶ A)
+    ((x ∙ z) ∙ (y ∙ z))))
+
+w = check [] S₁
+-- S = scope S₁ {p = ⊤.tt}

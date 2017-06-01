@@ -41,24 +41,30 @@ infixl 20 _⊢_∶_
 
 -- Examples
 
-postulate
-  Bool : Type
+-- postulate
+--   Bool : Type
 
-ex : [] , Bool ⊢ var (# 0) ∶ Bool
-ex = tVar
+-- ex : [] , Bool ⊢ var (# 0) ∶ Bool
+-- ex = tVar
 
-ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ⟶ Bool
-ex2 = tLam tVar
+-- ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ⟶ Bool
+-- ex2 = tLam tVar
 
-postulate
-  Word : Type
-  Num  : Type
+-- postulate
+--   Word : Type
+--   Num  : Type
 
--- K : [] ⊢ lam Word (lam Num (var (# 0))) ∶ Word ⟶ Num ⟶ Bool
-K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ⟶ Num ⟶ Word
-K = tLam (tLam tVar)
+-- K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ⟶ Num ⟶ Word
+-- K = tLam (tLam tVar)
 
-S : [] ⊢ lam (Word ⟶ Num) (lam (Word ⟶ Bool) (lam Bool ((var (# 2)) ∙ (var (# 0))) ∙ ((var (# 1)) ∙ (var (# 0))) ))
-       ∶ (Word ⟶ Num) ⟶ (Word ⟶ Bool) ⟶ Bool
-S = tLam (tLam (tLam ({!!} ∙ {!!}) ∙ ({!!} ∙ {!!})))
+-- postulate
+--   A : Type
+--   B : Type
+--   C : Type
 
+-- S : [] ⊢ lam (A ⟶ (B ⟶ C))
+--              (lam (A ⟶ B)
+--                   (lam A
+--                     ((var (# 2)) ∙ (var (# 0))) ∙ ((var (# 1)) ∙ (var (# 0))) ))
+--        ∶ (A ⟶ (B ⟶ C)) ⟶ (A ⟶ B) ⟶ A ⟶ C
+-- S = {!!} --  tLam (tLam (tLam ((tVar ∙ tVar) ∙ (tVar ∙ tVar))))

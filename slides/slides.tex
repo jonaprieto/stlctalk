@@ -231,7 +231,15 @@ data Expr : Set where
 \section{Typed Lambda Calculus}
 \begin{frame}{$\lambda\rightarrow$-Curry System}
 \begin{definition}
-
+\begin{itemize}
+\item The set of types is noted with $𝕋 =\text{ Type}(\lambda\rightarrow)$.
+$$𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 → 𝕋,$$
+where $𝕍 = \{α₁,α₂, \cdots \}$ be a set of type variables,
+$𝔹$ stands for a collection of type constants for basic types
+like \texttt{Nat} or \texttt{Bool}
+\item A \emph{statement} is of the form $M : σ$ with $M ∈ Λ$ and $σ ∈ 𝕋$
+\item \emph{Derivation} inference rules
+\vskip 1mm
 \begin{columns}
   \begin{column}{0.5\textwidth}
     \begin{prooftree}
@@ -242,48 +250,27 @@ data Expr : Set where
   \end{column}
   \begin{column}{0.5\textwidth}
     \begin{prooftree}
-    \AxiomC{$[x : \sigma]^1$}
+    \AxiomC{$[x : \sigma]^{(1)}$}
     \UnaryInfC{$\vdots$}
     \UnaryInfC{$M : \tau$}
+    \RightLabel{\scriptsize (1)}
     \UnaryInfC{$λx.M : σ → \tau$}
     \end{prooftree}
   \end{column}
 \end{columns}
-
+\item A statement $M : \sigma$ is derivable form a \textit{basis} $Γ$ denoted by $Γ ⊢ M : σ$
+where basis stands for be a set of statements with only distinct (term) variables as subjects
+\end{itemize}
 \end{definition}
 \end{frame}
 
-\section{Decibility of Type Assignment}
-\begin{frame}{Decibility of Type Assignment~\citep{barendregt2013lambda}}
-% \begin{equation*}
-% Γ ⊢ M : τ
-% \end{equation*}
-\begin{tabular}{ll}
-{\color{blu} \textbf{Problem}} & {\color{blu} \textbf{Question}} \\
-{\color{blu} Type-checking}    & Given $M$ and $τ$, $Γ⊢ M : τ$?  \\
-{\color{blu} Typability}       & Given $M$ does exists a $σ$, $Γ⊢ M : σ$? \\
-{\color{blu} Inhabitation}     & Given $τ$, does exists an $M$ such that $Γ⊢ M : σ$?\\
-\end{tabular}
 
-\begin{theorem}
+\section{Syntax Definitions}
+\begin{frame}[fragile]{Syntax defintion based on ~\citep{cactus}, and \citep{nad}}
 \begin{itemize}
-\item It is decidable whether a term is typable in $\lambda\rightarrow$.
-\item If a term $M$ is typable in $\lambda\rightarrow$, then M has a principal type scheme, i.e.
-a type $σ$ such that every possible type for $M$ is a subsitution instance of $σ$.
-Moreover $σ$ is computable from $M$.
-\end{itemize}
-\end{theorem}
-
-\begin{theorem}
-Type checking for $\lambda\rightarrow$ is decidable.
-\end{theorem}
-
-\end{frame}
-
-
-\section{Syntax}
-\begin{frame}[fragile]{Syntax Based on ~\citep{cactus}, and \citep{nad}}
-\vfill
+  \item Typing syntax: $𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 → 𝕋,$
+  \pause
+  \vskip 1.5mm
 \begin{minted}{cagda}
 module Typing (U : Set) where
 
@@ -291,11 +278,9 @@ data Type : Set where
   base : U    → Type
   _⟶_  : Type → Type → Type
 \end{minted}
-
-\vfill
-{\color{plum!45!black}\rule{\textwidth}{0.5pt}}
-\vfill
-
+\pause
+\item $\lambda\rightarrow$-Curry Syntax
+\vskip 1.5mm
 \begin{minted}{cagda}
 module Syntax (Type : Set) where
 
@@ -304,7 +289,7 @@ open import Data.String
 Name : Set
 Name = String
 
--- Type Judgments (x ∶ A).
+-- Statements.
 data Formal : Set where
   _∶_ : Name → Type → Formal
 
@@ -313,14 +298,15 @@ data Expr : Set where
   lam : Formal → Expr → Expr
   _∙_ : Expr   → Expr → Expr
 \end{minted}
-\vfill
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{\texttt{module Examples (Type : Set) where}}
 \begin{minted}{cagda}
 open import Syntax Type
 
-postulate A : Type
+postulate
+  A : Type
 
 x = var "x"
 y = var "y"
@@ -338,7 +324,44 @@ S =
 \end{minted}
 \end{frame}
 
-\section{Well-Scoped Expressions}
+\section{Decibility of Type Assignment}
+\begin{frame}{Decibility of Type Assignment~\citep{barendregt2013lambda}}
+% \begin{equation*}
+% Γ ⊢ M : τ
+% \end{equation*}
+\begin{tabular}{ll}
+{\color{blu} \textbf{Problem}} & {\color{blu} \textbf{Question}} \\
+{\color{blu} Typability}       & Given $M$ does exists a $σ$, $Γ⊢ M : σ$? \\
+{\color{blu} Type-checking}    & Given $M$ and $τ$, $Γ⊢ M : τ$?  \\
+{\color{blu} Inhabitation}     & Given $τ$, does exists an $M$ such that $Γ⊢ M : σ$?\\
+\end{tabular}
+\pause
+\begin{theorem}%[Typability]
+\begin{itemize}
+\item It is decidable whether a term is typable in $\lambda\rightarrow$.
+\item If a term $M$ is typable in $\lambda\rightarrow$, then M has a principal type scheme, i.e.
+a type $σ$ such that every possible type for $M$ is a subsitution instance of $σ$.
+Moreover $σ$ is computable from $M$.
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}%[Type-checking]
+Type checking for $\lambda\rightarrow$ is decidable.
+\end{theorem}
+
+\end{frame}
+
+\section{Well-Scoped Lambda Expressions}
+\begin{frame}{De Bruijn Index}
+\begin{itemize}
+\item The indexes are natural numbers that represent the occurrences of the variable in a λ-term
+$$  λx. λy. x ⇝  λ λ 2$$
+\item The natural number denotes the number of binders that are in scope between that occurrence and its corresponding binder
+$$λx. λy. λz. x z (y z)  ⇝ λ λ λ 3 1 (2 1)$$
+\item Check for $α$-equivalence is the same as that for syntactic equality
+\end{itemize}
+\end{frame}
+
 \begin{frame}[fragile]{module Bound (Type : Set) where}
 % Well-scoped Expresions with respect to a variable Binder.
 \begin{minted}{cagda}
@@ -369,7 +392,7 @@ data _⊢_⇝_ : ∀ {n} → Binder n → S.Expr → Expr n → Set where
 \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Examples}
 \begin{minted}{cagda}
 ∅ : Binder 0
 ∅ = []
@@ -398,7 +421,89 @@ P = {!!}
 \end{minted}
 \end{frame}
 
-\section{Typing}
+
+\begin{frame}[fragile]{Scope-checking}
+\begin{minted}{cagda}
+name-dec : ∀ {n} {Γ : Binder n} {x y : Name} {t : Expr (suc n)}
+         → Γ , y ⊢ var x ⇝ t
+         → x ≡ y ⊎ ∃[ t′ ] (Γ ⊢ var x ⇝ t′)
+
+⊢subst : ∀ {n} {x y} {Γ : Binder n} {t}
+       → x ≡ y
+       → Γ , x ⊢ var x ⇝ t
+       → Γ , y ⊢ var x ⇝ t
+
+find-name : ∀ {n}
+          → (Γ : Binder n)
+          → (x : Name)
+          → Dec (∃[ t ] (Γ ⊢ var x ⇝ t))
+
+check : ∀ {n}
+      → (Γ : Binder n)
+      → (t : S.Expr)
+      → Dec (∃[ t′ ] (Γ ⊢ t ⇝ t′))
+
+scope : (t : S.Expr) → {p : True (check [] t)} → Expr 0
+scope t {p} = proj₁ (toWitness p)
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{minted}{cagda}
+postulate A : Type
+
+I₁ : S.Expr
+I₁ = S.lam ("x" ∶ A) (S.var "x")
+
+open import Data.Unit
+
+I : Expr 0
+I = scope I₁ {p = ⊤.tt}  -- Use C-C-C-n.
+
+x, y, z : S.Expr
+
+x = var "x"
+y = var "y"
+z = var "z"
+
+S₁ : S.Expr
+S₁ =
+  lam ("x" ∶ A)
+    (lam ("y" ∶ A)
+    (lam ("z" ∶ A)
+    ((x ∙ z) ∙ (y ∙ z))))
+
+S : Expr 0
+S = scope S₁ {p = ⊤.tt}
+\end{minted}
+\end{frame}
+
+
+\begin{frame}{Typing Rules}
+\begin{itemize}
+\item Introduction\\
+\begin{prooftree}
+\AxiomC{$Γ(t) = \tau$}
+\UnaryInfC{$Γ ⊢ t : \tau$}
+\end{prooftree}\hfill
+
+\item Abstraction\\
+\begin{prooftree}
+\AxiomC{$Γ , τ ⊢ t : τ'$}
+\UnaryInfC{$Γ ⊢ λ(x :τ). t ∶ τ ⟶ τ′$}
+\end{prooftree}\hfill
+
+\item Application
+\begin{prooftree}
+\AxiomC{$Γ ⊢ t₁ : τ ⟶ τ′$}
+\AxiomC{$Γ ⊢ t₂ : τ$}
+\BinaryInfC{$Γ ⊢ t₁∙ t₂ ∶ τ′$}
+\end{prooftree}\hfill
+\end{itemize}
+
+\end{frame}
+
+\section{Typability and Type-checking}
 \begin{frame}[fragile]{\texttt{module Typing (U : Set) where}}
 \begin{minted}{cagda}
 open import Bound Type hiding (_,_)
@@ -421,6 +526,27 @@ data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
        → Γ ⊢ t₁ ∶ τ ⟶ τ′
        → Γ ⊢ t₂ ∶ τ
        → Γ ⊢ t₁ ∙ t₂ ∶ τ′
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{minted}{cagda}
+
+postulate
+  Bool : Type
+
+ex : [] , Bool ⊢ var (# 0) ∶ Bool
+ex = tVar
+
+ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ⟶ Bool
+ex2 = tLam tVar
+
+postulate
+  Word : Type
+  Num  : Type
+
+K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ⟶ Num ⟶ Word
+K = tLam (tLam tVar)
 \end{minted}
 \end{frame}
 
