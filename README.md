@@ -1,4 +1,4 @@
-STLC Talk
+STLC Talk [![Build Status](https://travis-ci.org/jonaprieto/stlctalk.svg?branch=master)](https://travis-ci.org/jonaprieto/stlctalk)
 ---
 
 We present a formalization of the syntax in Agda for the Simple Typed Lambda Calculus (STLC)
