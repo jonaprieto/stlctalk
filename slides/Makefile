@@ -3,15 +3,11 @@
 .PHONY : tex
 tex :
 	make clean
-	xelatex -shell-escape slides.tex
-	biber slides.bcf
-	xelatex -shell-escape slides.tex
-	make clean
-	open slides.pdf
-
+	latexmk -pvc -xelatex -shell-escape -pdf
 
 .PHONY: clean
 clean :
+	@latexmk -c
 	@rm -f *.vrb
 	@rm -f *.nav
 	@rm -f *.aux
