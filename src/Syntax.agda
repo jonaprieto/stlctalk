@@ -1,18 +1,43 @@
 module Syntax (Type : Set) where
 
+------------------------------------------------------------------------------
+
 open import Data.String
+
+------------------------------------------------------------------------------
 
 Name : Set
 Name = String
 
--- Type Judgments (x ∶ A).
 data Formal : Set where
   _∶_ : Name → Type → Formal
 
-
 data Expr : Set where
-  var : Name   → Expr         -- var "x"
-  lam : Formal → Expr → Expr  -- λ(x ∶ A).t
-  _∙_ : Expr   → Expr → Expr  -- MN
+  var : Name   → Expr
+  lam : Formal → Expr → Expr
+  _∙_ : Expr   → Expr → Expr
 
 infixl 20 _∙_
+
+-- -- Examples.
+-- postulate A : Type
+
+-- x = var "x"
+-- y = var "y"
+-- z = var "z"
+
+-- -- λx.x
+-- I : Expr
+-- I = lam ("x" ∶ A) x
+
+-- -- λxy.x
+-- K : Expr
+-- K = lam ("x" ∶ A) (lam ("y" ∶ A) x)
+
+-- -- λxyz.xz(yz)
+-- S : Expr
+-- S =
+--   lam ("x" ∶ A)
+--     (lam ("y" ∶ A)
+--       (lam ("z" ∶ A)
+--         ((x ∙ z) ∙ (y ∙ z))))

@@ -5,105 +5,151 @@ module Typecheck {U : Set} (UEq : IsDecEquivalence {A = U} _≡_) where
 
 ------------------------------------------------------------------------------
 
-open import Typing U
-open import Bound Type
-
 open IsDecEquivalence UEq using (_≟_)
 
-open import Data.Nat hiding (_≟_)
-open import Data.Fin
-open import Data.Vec
-open import Function using (_∘_; _$_)
+open import Typing U
+  using (Type; base; _↣_; _⊢_∶_; Ctxt; tVar; tLam; _∙_)
+open import Bound Type
 
-open import Data.Product renaming (_,_ to _-and-_)
-open import Data.Product using (∃; ∄)
-open import Utils
+open import Data.Nat         hiding (_≟_)
+open import Data.Product     renaming (_,_ to _-and-_)
+open import Data.Product     using (∃; ∄)
+open import Data.Vec         using (Vec; _∷_; lookup)
 
-open import Relation.Nullary
+open import Function         using (_∘_; _$_)
 open import Relation.Binary.PropositionalEquality
+  using (refl; cong; cong₂; sym)
+open import Relation.Nullary using (Dec; yes; no; ¬_)
 
-el-inj : ∀ {A B} → base A ≡ base B → A ≡ B
-el-inj refl = refl
+open import Utils            using (∃-syntax; ∄-syntax)
 
-arr-injˡ : ∀ {τ τ′ τ₂ τ₂′} → τ ⟶ τ₂ ≡ τ′ ⟶ τ₂′ → τ ≡ τ′
-arr-injˡ refl = refl
+------------------------------------------------------------------------------
 
-arr-injʳ : ∀ {τ τ′ τ″} → τ ⟶ τ′ ≡ τ ⟶ τ″ → τ′ ≡ τ″
-arr-injʳ refl = refl
-
+-- Equality between Types.
 _T≟_ : (τ τ′ : Type) → Dec (τ ≡ τ′)
+
 base A T≟ base B with A ≟ B
-base A T≟ base .A | yes refl = yes refl
-base A T≟ base B | no A≢B = no (A≢B ∘ el-inj)
-base A T≟ (_ ⟶ _) = no (λ ())
-(τ₁ ⟶ τ₂) T≟ base B = no (λ ())
-(τ₁ ⟶ τ₂) T≟ (τ₁′ ⟶ τ₂′) with τ₁ T≟ τ₁′
-(τ₁ ⟶ τ₂) T≟ (τ₁′ ⟶ τ₂′) | no ¬p = no (¬p ∘ arr-injˡ)
-(τ₁ ⟶ τ₂) T≟ (.τ₁ ⟶ τ₂′) | yes refl with τ₂ T≟ τ₂′
-(τ₁ ⟶ τ₂) T≟ (.τ₁ ⟶ .τ₂) | yes refl | yes refl = yes refl
-(τ₁ ⟶ τ₂) T≟ (.τ₁ ⟶ τ₂′) | yes refl | no ¬p = no (¬p ∘ arr-injʳ)
+... | yes A≡B = yes (cong base A≡B)
+... | no  A≢B = no (A≢B ∘ helper)
+  where
+    helper : base A ≡ base B → A ≡ B
+    helper refl = refl
+base A T≟ (_ ↣ _) = no (λ ())
 
-⊢-inj : ∀ {n Γ} {E : Expr n} → ∀ {τ τ′} → Γ ⊢ E ∶ τ → Γ ⊢ E ∶ τ′ → τ ≡ τ′
+(τ₁ ↣ τ₂) T≟ base B = no (λ ())
+(τ₁ ↣ τ₂) T≟ (τ₁′ ↣ τ₂′) with τ₁ T≟ τ₁′
+... | no  τ₁≢τ₁′ = no (τ₁≢τ₁′ ∘ helper)
+  where
+    helper :  τ₁ ↣ τ₂ ≡ τ₁′ ↣ τ₂′ → τ₁ ≡ τ₁′
+    helper refl = refl
+
+... | yes τ₁≡τ₁′ with τ₂ T≟ τ₂′
+...            | yes τ₂≡τ₂′ = yes (cong₂ _↣_ τ₁≡τ₁′ τ₂≡τ₂′)
+...            | no  τ₂≢τ₂′ = no (τ₂≢τ₂′ ∘ helper)
+  where
+    helper : τ₁ ↣ τ₂ ≡ τ₁′ ↣ τ₂′ → τ₂ ≡ τ₂′
+    helper refl = refl
+
+
+⊢-inj : ∀ {n Γ} {t : Expr n} → ∀ {τ σ}
+      → Γ ⊢ t ∶ τ
+      → Γ ⊢ t ∶ σ
+      → τ ≡ σ
 ⊢-inj tVar tVar = refl
-⊢-inj {E = lam τ E} (tLam t) (tLam t′) = cong (_⟶_ τ) (⊢-inj t t′)
-⊢-inj (t₁ ∙ t₂) (t₁′ ∙ t₂′) with ⊢-inj t₁ t₁′
-⊢-inj (t₁ ∙ t₂) (t₁′ ∙ t₂′) | refl with ⊢-inj t₂ t₂′
-⊢-inj (t₁ ∙ t₂) (t₁′ ∙ t₂′) | refl | refl = refl
+⊢-inj {t = lam τ t} (tLam Γ,τ⊢t:τ′) (tLam Γ,τ⊢t:τ″)
+  = cong (_↣_ τ) (⊢-inj Γ,τ⊢t:τ′ Γ,τ⊢t:τ″)
+⊢-inj (Γ⊢t₁:τ↣τ₂ ∙ Γ⊢t₂:τ) (Γ⊢t₁:τ₁↣σ ∙ Γ⊢t₂:τ₁)
+  = helper (⊢-inj Γ⊢t₁:τ↣τ₂ Γ⊢t₁:τ₁↣σ)
+  where
+    helper : ∀ {τ τ₂ τ₁ σ} → (τ ↣ τ₂ ≡ τ₁ ↣ σ) → τ₂ ≡ σ
+    helper refl = refl
 
-lam-injˡ : ∀ {n τ₁ τ₂ τ} {Γ : Ctxt n} {E : Expr (suc n)} →
-           Γ ⊢ lam τ E ∶ (τ₁ ⟶ τ₂) → τ₁ ≡ τ
-lam-injˡ (tLam t) = refl
+-- Typability.
+infer : ∀ {n} Γ (t : Expr n) → Dec (∃[ τ ] (Γ ⊢ t ∶ τ))
 
-mutual
-  infer : ∀ {n} Γ (E : Expr n) → Dec (∃[ τ ] (Γ ⊢ E ∶ τ))
-  infer Γ (var x) = yes ((lookup x Γ) -and- tVar)
-  infer Γ (lam τ E) with infer (τ ∷ Γ) E
-  infer Γ (lam τ E) | yes (τ′ -and- E∷τ′) = yes (τ ⟶ τ′ -and- tLam E∷τ′)
-  infer Γ (lam τ E) | no ¬p = no lem
-    where
-    lem : ∄[ τ′ ] (Γ ⊢ lam τ E ∶ τ′)
-    lem (base A -and- ())
-    lem (.τ ⟶ _ -and- tLam t) = ¬p (_ -and- t)
-  infer Γ (E ∙ F) with infer Γ E
-  infer Γ (E ∙ F) | yes (base A -and- t) = no lem
-    where
-    lem : ∄[ τ ] (Γ ⊢ E ∙ F ∶ τ)
-    lem (_ -and- t₁ ∙ _) with ⊢-inj t t₁
-    lem (_ -and- t₁ ∙ _) | ()
-  infer Γ (E ∙ F) | yes (τ₁ ⟶ τ₂ -and- tE) with check Γ F τ₁
-  infer Γ (E ∙ F) | yes (τ₁ ⟶ τ₂ -and- tE) | yes tF = yes (τ₂ -and- tE ∙ tF)
-  infer Γ (E ∙ F) | yes (τ₁ ⟶ τ₂ -and- tE) | no ¬p = no lem
-    where
-    lem : ∄[ τ ] (Γ ⊢ E ∙ F ∶ τ)
-    lem (_ -and- t₁ ∙ _) with ⊢-inj t₁ tE
-    lem (.τ₂ -and- _ ∙ t₂) | refl = ¬p t₂
-  infer Γ (E ∙ F) | no ¬p = no lem
-    where
-    lem : ∄[ τ ] (Γ ⊢ E ∙ F ∶ τ)
-    lem (_ -and- t ∙ _) = ¬p (_ -and- t)
+-- Var case.
+infer Γ (var x) = yes (lookup x Γ -and- tVar)
 
-  check : ∀ {n} Γ (E : Expr n) → ∀ τ → Dec (Γ ⊢ E ∶ τ)
-  check Γ (var x) τ with lookup x Γ T≟ τ
-  check Γ (var x) .(lookup x Γ) | yes refl = yes tVar
-  check Γ (var x) τ | no ¬p = no (¬p ∘ ⊢-inj tVar)
-  check Γ (lam τ′ E) (base A) = no (λ ())
-  check Γ (lam τ′ E) (τ₁ ⟶ τ₂) with τ₁ T≟ τ′
-  check Γ (lam τ′ E) (.τ′ ⟶ τ₂) | yes refl with check (τ′ ∷ Γ) E τ₂
-  check Γ (lam τ′ E) (.τ′ ⟶ τ₂) | yes refl | yes t = yes (tLam t)
-  check Γ (lam τ′ E) (.τ′ ⟶ τ₂) | yes refl | no ¬p = no lem
+-- Abstraction case.
+infer Γ (lam τ t) with infer (τ ∷ Γ) t
+... | yes (σ -and- Γ,τ⊢t:σ) = yes (τ ↣ σ -and- tLam Γ,τ⊢t:σ)
+... | no  Γ,τ⊬t:σ = no helper
+  where
+    helper : ∄[ τ′ ] (Γ ⊢ lam τ t ∶ τ′)
+    helper (base A -and- ())
+    helper (.τ ↣ σ -and- tLam Γ,τ⊢t:σ) = Γ,τ⊬t:σ (σ -and- Γ,τ⊢t:σ)
+
+-- Application case.
+infer Γ (t₁ ∙ t₂) with infer Γ t₁ | infer Γ t₂
+... | no  ∄τ⟨Γ⊢t₁:τ⟩ | _ = no helper
     where
-    lem : ¬ Γ ⊢ lam τ′ E ∶ τ′ ⟶ τ₂
-    lem (tLam t) = ¬p t
-  check Γ (lam τ′ E) (τ₁ ⟶ τ₂) | no ¬p = no (¬p ∘ lam-injˡ)
-  check Γ (E ∙ F) τ with infer Γ F
-  check Γ (E ∙ F) τ | yes (τ′ -and- F∷τ′) with check Γ E (τ′ ⟶ τ)
-  check Γ (E ∙ F) τ | yes (τ′ -and- F∷τ′) | yes E∷τ′⟶τ = yes (E∷τ′⟶τ ∙ F∷τ′)
-  check Γ (E ∙ F) τ | yes (τ′ -and- F∷τ′) | no ¬p = no lem
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:τ ∙ _) = ∄τ⟨Γ⊢t₁:τ⟩ (_ ↣ τ -and- Γ⊢t₁:τ)
+
+... | yes (base x -and- Γ⊢t₁:base) | _ = no helper
     where
-    lem : ¬ Γ ⊢ E ∙ F ∶ τ
-    lem (_∙_ {τ = τ₀} t t′) with ⊢-inj F∷τ′ t′
-    lem (t ∙ t′) | refl = ¬p t
-  check Γ (E ∙ F) τ | no ¬tF = no lem
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:_↣_ ∙ _)
+        with ⊢-inj Γ⊢t₁:_↣_ Γ⊢t₁:base
+      ...  | ()
+
+... | yes (τ₁ ↣ τ₂ -and- Γ⊢t₁:τ₁↣τ₂) | no  ∄τ⟨Γ⊢t₂:τ⟩ = no helper
     where
-    lem : ¬ Γ ⊢ E ∙ F ∶ τ
-    lem (_∙_ {τ = τ} t t′) = ¬tF (τ -and- t′)
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:τ₁′↣τ₂′ ∙ Γ⊢t₂:τ)
+        with ⊢-inj Γ⊢t₁:τ₁↣τ₂ Γ⊢t₁:τ₁′↣τ₂′
+      ...  | refl = ∄τ⟨Γ⊢t₂:τ⟩ (τ₁ -and- Γ⊢t₂:τ)
+
+... | yes (τ₁ ↣ τ₂ -and- Γ⊢t₁:τ₁↣τ₂) | yes (τ₁′ -and- Γ⊢t₂:τ₁′)
+    with τ₁ T≟ τ₁′
+...  | yes τ₁≡τ₁′ = yes (τ₂ -and- Γ⊢t₁:τ₁↣τ₂ ∙ helper)
+     where
+       helper : Γ ⊢ t₂  ∶ τ₁
+       helper = subst (_⊢_∶_ Γ t₂) (sym τ₁≡τ₁′) Γ⊢t₂:τ₁′
+...  | no  τ₁≢τ₁′ = no helper
+     where
+       helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+       helper (_ -and- Γ⊢t₁:τ↣τ₂ ∙ Γ⊢t₂:τ₁)
+         with ⊢-inj  Γ⊢t₁:τ↣τ₂ Γ⊢t₁:τ₁↣τ₂
+       ...  | refl = τ₁≢τ₁′ (⊢-inj Γ⊢t₂:τ₁ Γ⊢t₂:τ₁′)
+
+
+-- Type-checking.
+check : ∀ {n} Γ (t : Expr n) → ∀ τ → Dec (Γ ⊢ t ∶ τ)
+
+-- Var case.
+check Γ (var x) τ with lookup x Γ T≟ τ
+... | yes refl = yes tVar
+... | no ¬p    = no (¬p ∘ ⊢-inj tVar)
+
+-- Abstraction case.
+check Γ (lam τ t) (base A) = no (λ ())
+check Γ (lam τ t) (τ₁ ↣ τ₂) with τ₁ T≟ τ
+... | no τ₁≢τ = no (τ₁≢τ ∘ helper)
+    where
+      helper : Γ ⊢ lam τ t ∶ (τ₁ ↣ τ₂) → τ₁ ≡ τ
+      helper (tLam t) = refl
+
+... | yes refl with check (τ ∷ Γ) t τ₂
+...               | yes Γ,τ⊢t:τ₂ = yes (tLam Γ,τ⊢t:τ₂)
+...               | no  Γ,τ⊬t:τ₂ = no helper
+  where
+    helper : ¬ Γ ⊢ lam τ t ∶ τ ↣ τ₂
+    helper (tLam Γ,τ⊢t:_) = Γ,τ⊬t:τ₂ Γ,τ⊢t:_
+
+-- Application case.
+check Γ (t₁ ∙ t₂) σ with infer Γ t₂
+... | yes (τ -and- Γ⊢t₂:τ)
+    with check Γ t₁ (τ ↣ σ)
+...    | yes Γ⊢t₁:τ↣σ = yes (Γ⊢t₁:τ↣σ ∙ Γ⊢t₂:τ)
+...    | no  Γ⊬t₁:τ↣σ = no helper
+  where
+    helper : ¬ Γ ⊢ t₁ ∙ t₂ ∶ σ
+    helper (Γ⊢t₁:_↣_ ∙ Γ⊢t₂:τ′)
+      with ⊢-inj Γ⊢t₂:τ Γ⊢t₂:τ′
+    ...  | refl = Γ⊬t₁:τ↣σ Γ⊢t₁:_↣_
+
+check Γ (t₁ ∙ t₂) σ | no Γ⊬t₂:_ = no helper
+  where
+    helper : ¬ Γ ⊢ t₁ ∙ t₂ ∶ σ
+    helper (_∙_ {τ = σ} t Γ⊢t₂:τ′) = Γ⊬t₂:_ (σ -and- Γ⊢t₂:τ′)

@@ -35,6 +35,7 @@
 \definecolor{plum}{RGB}{87,78,164}
 \definecolor{petunias}{RGB}{109,80,139}
 \definecolor{letour}{RGB}{101,41,105}
+\definecolor{carmine}{rgb}{0.59, 0.0, 0.09}
 % --------------------------------------------------------------------------
 
 % --------------------------------------------------------------------------
@@ -76,6 +77,7 @@
 
 % \setbeamercolor{institute}{fg=blu}
 \setbeamercolor{title}{fg=blu}
+\setbeamercolor{bibliography item}{fg=blu}
 % \setbeamercolor{subtitle}{fg=blu}
 
 % \setbeamercolor{titlelike}{fg=blu}
@@ -112,6 +114,7 @@
 ]{DejaVuSansMono.ttf}
 
 \setmathfont[ExternalLocation=fonts/
+  , Colour=blu
   ]{DejaVuMathTeXGyre.ttf}
 \newfontfamily\mathfont{fonts/DejaVuMathTeXGyre.ttf}
 
@@ -172,7 +175,7 @@
 % Title and Author
 % --------------------------------------------------------------------------
 
-\title[The Simply Typed $\lambda$-Calculus]{The Simply Typed $\lambda$-Calculus}
+\title[The Simply Typed Lambda Calculus]{The Simply Typed Lambda Calculus}
 
 \subtitle{(In \texttt{Agda})}
 \date{\footnotesize 1th June 2017}
@@ -203,19 +206,33 @@ Medell\'in, Colombia}
 \tableofcontents
 \end{frame}
 
+\begin{frame}{About}
+\begin{itemize}
+\item The Agda source code of this talk is available in the repository
+{\color{plum}
+\begin{center}
+\href{https://github.com/jonaprieto/stlctalk}{https://github.com/jonaprieto/stlctalk}
+\end{center}
+}
+and it was mostly based on the implementation by \citep{cactus} and \citep{nad} of
+the simple lambda calculus
+\item Tested with Agda v$2.5.2$ and Agda Standard Library v$0.13$
+\end{itemize}
+\end{frame}
+
 \section{Lambda Calculus}
-\begin{frame}[fragile]{$\lambda$-Calculus}
+\begin{frame}[fragile]{Lambda Calculus}
 \begin{definition}
-The set of $\lambda$-terms denoted by $\Lambda$ is built up
-from a set of variables $V$ using application and (function) abstraction.
+\begin{itemize}
+\item The set of $\lambda$-terms denoted by $\Lambda$ is built up
+from a set of variables $V$ using application and (function) abstraction
 \begin{align*}
-x\in V                  &\Rightarrow x\in \Lambda, \\
-M\in \Lambda, x\in V    &\Rightarrow (\lambda x. M) \in \Lambda,\\
-M, N\in \Lambda         &\Rightarrow (MN) \in \Lambda, \\
-M, N\in \Lambda, x\in V &\Rightarrow ((\lambda x. M)\,N) \in \Lambda.
+x\in V                &\Rightarrow x\in \Lambda, \\
+M\in \Lambda, x\in V  &\Rightarrow (\lambda x. M) \in \Lambda,\\
+M, N\in \Lambda       &\Rightarrow (MN) \in \Lambda.
 \end{align*}
-\end{definition}
-\pause
+\item A simple syntax definition for lambda terms
+\vskip 1.5mm
 \begin{minted}{cagda}
 Name : Set
 Name = String
@@ -225,15 +242,15 @@ data Expr : Set where
   lam : Name → Expr → Expr
   _∙_ : Expr → Expr → Expr
 \end{minted}
-
+\end{itemize}
+\end{definition}
 \end{frame}
 
 \section{Typed Lambda Calculus}
-\begin{frame}{$\lambda\rightarrow$-Curry System}
-\begin{definition}
+\begin{frame}{Lambda Curry System}
 \begin{itemize}
 \item The set of types is noted with $𝕋 =\text{ Type}(\lambda\rightarrow)$.
-$$𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 → 𝕋,$$
+$$𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 ↣ 𝕋,$$
 where $𝕍 = \{α₁,α₂, \cdots \}$ be a set of type variables,
 $𝔹$ stands for a collection of type constants for basic types
 like \texttt{Nat} or \texttt{Bool}
@@ -243,7 +260,7 @@ like \texttt{Nat} or \texttt{Bool}
 \begin{columns}
   \begin{column}{0.5\textwidth}
     \begin{prooftree}
-    \AxiomC{$M : σ ⟶ τ$}
+    \AxiomC{$M : σ ↣ τ$}
     \AxiomC{$N : σ$}
     \BinaryInfC{$MN : τ$}
     \end{prooftree}
@@ -254,32 +271,31 @@ like \texttt{Nat} or \texttt{Bool}
     \UnaryInfC{$\vdots$}
     \UnaryInfC{$M : \tau$}
     \RightLabel{\scriptsize (1)}
-    \UnaryInfC{$λx.M : σ → \tau$}
+    \UnaryInfC{$λx.M : σ ↣ \tau$}
     \end{prooftree}
   \end{column}
 \end{columns}
-\item A statement $M : \sigma$ is derivable form a \textit{basis} $Γ$ denoted by $Γ ⊢ M : σ$
-where basis stands for be a set of statements with only distinct (term) variables as subjects
+\vskip 1mm
+\item A statement $M : \sigma$ is derivable form a \textit{basis} $Γ$ denoted
+by $Γ ⊢ M : σ$ where basis stands for be a set of statements with only distinct
+(term) variables as subjects
 \end{itemize}
-\end{definition}
 \end{frame}
-
 
 \section{Syntax Definitions}
 \begin{frame}[fragile]{Syntax defintion based on ~\citep{cactus}, and \citep{nad}}
 \begin{itemize}
-  \item Typing syntax: $𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 → 𝕋,$
-  \pause
+  \item Typing syntax: $𝕋 = 𝕍\, |\, 𝔹\, |\, 𝕋 ↣ 𝕋$,
   \vskip 1.5mm
 \begin{minted}{cagda}
 module Typing (U : Set) where
 
 data Type : Set where
   base : U    → Type
-  _⟶_  : Type → Type → Type
+  _↣_  : Type → Type → Type
 \end{minted}
-\pause
-\item $\lambda\rightarrow$-Curry Syntax
+
+\item A syntax definition including type annotations
 \vskip 1.5mm
 \begin{minted}{cagda}
 module Syntax (Type : Set) where
@@ -289,7 +305,6 @@ open import Data.String
 Name : Set
 Name = String
 
--- Statements.
 data Formal : Set where
   _∶_ : Name → Type → Formal
 
@@ -301,41 +316,39 @@ data Expr : Set where
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{\texttt{module Examples (Type : Set) where}}
+\begin{frame}[fragile]{Examples}
 \begin{minted}{cagda}
 open import Syntax Type
 
-postulate
-  A : Type
+postulate A : Type
 
 x = var "x"
 y = var "y"
 z = var "z"
 
+-- Combinators.
 -- I, K, S : Expr
 
-I = lam ("x" ∶ A) x                  -- λx.x, x ∈ A
-K = lam ("x" ∶ A) (lam ("y" ∶ A) x)  -- λxy.x, x,y ∈ A
+I = lam ("x" ∶ A) x                  -- λx.x, x : A
+K = lam ("x" ∶ A) (lam ("y" ∶ A) x)  -- λxy.x, x,y : A
 S =
   lam ("x" ∶ A)
     (lam ("y" ∶ A)
       (lam ("z" ∶ A)
-        ((x ∙ z) ∙ (y ∙ z))))        -- λxyz.xz(yz), x,y,z ∈ A
+        ((x ∙ z) ∙ (y ∙ z))))        -- λxyz.xz(yz), x,y,z : A
 \end{minted}
 \end{frame}
 
 \section{Decibility of Type Assignment}
 \begin{frame}{Decibility of Type Assignment~\citep{barendregt2013lambda}}
-% \begin{equation*}
-% Γ ⊢ M : τ
-% \end{equation*}
+
 \begin{tabular}{ll}
 {\color{blu} \textbf{Problem}} & {\color{blu} \textbf{Question}} \\
-{\color{blu} Typability}       & Given $M$ does exists a $σ$, $Γ⊢ M : σ$? \\
-{\color{blu} Type-checking}    & Given $M$ and $τ$, $Γ⊢ M : τ$?  \\
-{\color{blu} Inhabitation}     & Given $τ$, does exists an $M$ such that $Γ⊢ M : σ$?\\
+{\color{blu} Typability}       & Given $M$ does exists a $σ$ such that $Γ ⊢ M : σ$? \\
+{\color{blu} Type-checking}    & Given $M$ and $τ$, can we have $Γ ⊢ M : τ$?  \\
+{\color{blu} Inhabitation}     & Given $τ$, does exists an $M$ such that $Γ ⊢ M : σ$?\\
 \end{tabular}
-\pause
+
 \begin{theorem}%[Typability]
 \begin{itemize}
 \item It is decidable whether a term is typable in $\lambda\rightarrow$.
@@ -352,28 +365,31 @@ Type checking for $\lambda\rightarrow$ is decidable.
 \end{frame}
 
 \section{Well-Scoped Lambda Expressions}
-\begin{frame}{De Bruijn Index}
+\begin{frame}[fragile]{De Bruijn Index}
 \begin{itemize}
 \item The indexes are natural numbers that represent the occurrences of the variable in a λ-term
 $$  λx. λy. x ⇝  λ λ 2$$
 \item The natural number denotes the number of binders that are in scope between that occurrence and its corresponding binder
 $$λx. λy. λz. x z (y z)  ⇝ λ λ λ 3 1 (2 1)$$
 \item Check for $α$-equivalence is the same as that for syntactic equality
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{module Bound (Type : Set) where}
-% Well-scoped Expresions with respect to a variable Binder.
+\item A syntax definition using De Bruijn indexes\\[3mm]
 \begin{minted}{cagda}
 data Expr (n : ℕ) : Set where
   var : Fin n  → Expr n
   lam : Type   → Expr (suc n) → Expr n
   _∙_ : Expr n → Expr n       → Expr n
+\end{minted}
+\end{itemize}
+\end{frame}
 
+\begin{frame}[fragile]{\texttt{module Bound (Type : Set) where}}
+% Well-scoped Expresions with respect to a variable Binder.
+\begin{minted}{cagda}
 Binder : ℕ → Set
 Binder = Vec Name
 
 data _⊢_⇝_ : ∀ {n} → Binder n → S.Expr → Expr n → Set where
+
   var-zero : ∀ {n x} {Γ : Binder n}
            → Γ , x ⊢ var x ⇝ var (# 0)
 
@@ -417,12 +433,11 @@ K₂ = lam (lam var-zero)
 
 P : Γ ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (lam ("z" ∶ A) (var "x")))
       ⇝ lam A (lam A (lam A (var (# 2))))
-P = {!!}
+P = {!!}   -- complete!!
 \end{minted}
 \end{frame}
 
-
-\begin{frame}[fragile]{Scope-checking}
+\begin{frame}[fragile]{\texttt{module Scopecheck (Type : Set) where}}
 \begin{minted}{cagda}
 name-dec : ∀ {n} {Γ : Binder n} {x y : Name} {t : Expr (suc n)}
          → Γ , y ⊢ var x ⇝ t
@@ -448,7 +463,7 @@ scope t {p} = proj₁ (toWitness p)
 \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Examples}
 \begin{minted}{cagda}
 postulate A : Type
 
@@ -457,24 +472,21 @@ I₁ = S.lam ("x" ∶ A) (S.var "x")
 
 open import Data.Unit
 
-I : Expr 0
-I = scope I₁ {p = ⊤.tt}  -- Use C-C-C-n.
+I = scope I₁ {p = ⊤.tt}  -- Use C-C-C-n and check for I.
 
 x, y, z : S.Expr
-
 x = var "x"
 y = var "y"
 z = var "z"
 
-S₁ : S.Expr
 S₁ =
   lam ("x" ∶ A)
     (lam ("y" ∶ A)
-    (lam ("z" ∶ A)
-    ((x ∙ z) ∙ (y ∙ z))))
+      (lam ("z" ∶ A)
+        ((x ∙ z) ∙ (y ∙ z))))
 
 S : Expr 0
-S = scope S₁ {p = ⊤.tt}
+S = scope S₁ {p = ⊤.tt}  -- Use C-C-C-n and check for S.
 \end{minted}
 \end{frame}
 
@@ -489,15 +501,15 @@ S = scope S₁ {p = ⊤.tt}
 
 \item Abstraction\\
 \begin{prooftree}
-\AxiomC{$Γ , τ ⊢ t : τ'$}
-\UnaryInfC{$Γ ⊢ λ(x :τ). t ∶ τ ⟶ τ′$}
+\AxiomC{$Γ , τ ⊢ t : σ$}
+\UnaryInfC{$Γ ⊢ λ\ τ\ t ∶ τ ↣ \sigma$}
 \end{prooftree}\hfill
 
 \item Application
 \begin{prooftree}
-\AxiomC{$Γ ⊢ t₁ : τ ⟶ τ′$}
+\AxiomC{$Γ ⊢ t₁ : τ ↣ σ$}
 \AxiomC{$Γ ⊢ t₂ : τ$}
-\BinaryInfC{$Γ ⊢ t₁∙ t₂ ∶ τ′$}
+\BinaryInfC{$Γ ⊢ t₁ ∙ t₂ ∶ σ$}
 \end{prooftree}\hfill
 \end{itemize}
 
@@ -515,44 +527,205 @@ _,_ : ∀ {n} → Ctxt n → Type → Ctxt (suc n)
 Γ , x = x ∷ Γ
 
 data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
+
   tVar : ∀ {n Γ} {x : Fin n}
        → Γ ⊢ var x ∶ lookup x Γ
 
-  tLam : ∀ {n} {Γ : Ctxt n} {t} {τ τ′}
-       → Γ , τ ⊢ t ∶ τ′
-       → Γ ⊢ lam τ t ∶ τ ⟶ τ′
+  tLam : ∀ {n} {Γ : Ctxt n} {t} {τ σ}
+       → Γ , τ ⊢ t ∶ σ
+       → Γ ⊢ lam τ t ∶ τ ↣ σ
 
-  _∙_  : ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ τ′}
-       → Γ ⊢ t₁ ∶ τ ⟶ τ′
+  _∙_  : ∀ {n} {Γ : Ctxt n} {t₁ t₂} {τ σ}
+       → Γ ⊢ t₁ ∶ τ ↣ σ
        → Γ ⊢ t₂ ∶ τ
-       → Γ ⊢ t₁ ∙ t₂ ∶ τ′
+       → Γ ⊢ t₁ ∙ t₂ ∶ σ
 \end{minted}
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Examples}
 \begin{minted}{cagda}
-
 postulate
   Bool : Type
 
 ex : [] , Bool ⊢ var (# 0) ∶ Bool
 ex = tVar
 
-ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ⟶ Bool
+ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ↣ Bool
 ex2 = tLam tVar
 
 postulate
   Word : Type
   Num  : Type
 
-K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ⟶ Num ⟶ Word
+K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ↣ Num ↣ Word
 K = tLam (tLam tVar)
 \end{minted}
 \end{frame}
 
-% \begin{frame}[allowframebreaks]{References}
-% \printbibliography
-% \end{frame}
+
+\begin{frame}[fragile]{Equality Between Types}
+\begin{minted}{cagda}
+_T≟_ : (τ τ′ : Type) → Dec (τ ≡ τ′)
+base A T≟ base B with A ≟ B
+... | yes A≡B = yes (cong base A≡B)
+... | no  A≢B = no (A≢B ∘ helper)
+  where
+    helper : base A ≡ base B → A ≡ B
+    helper refl = refl
+base A T≟ (_ ↣ _) = no (λ ())
+
+(τ₁ ↣ τ₂) T≟ base B = no (λ ())
+(τ₁ ↣ τ₂) T≟ (τ₁′ ↣ τ₂′) with τ₁ T≟ τ₁′
+... | no  τ₁≢τ₁′ = no (τ₁≢τ₁′ ∘ helper)
+  where
+    helper :  τ₁ ↣ τ₂ ≡ τ₁′ ↣ τ₂′ → τ₁ ≡ τ₁′
+    helper refl = refl
+... | yes τ₁≡τ₁′
+  with τ₂ T≟ τ₂′
+...  | yes τ₂≡τ₂′ = yes (cong₂ _↣_ τ₁≡τ₁′ τ₂≡τ₂′)
+...  | no  τ₂≢τ₂′ = no (τ₂≢τ₂′ ∘ helper)
+  where
+    helper : τ₁ ↣ τ₂ ≡ τ₁′ ↣ τ₂′ → τ₂ ≡ τ₂′
+    helper refl = refl
+\end{minted}
+\end{frame}
+\begin{frame}[fragile]{An Example of an Useful Theorem}
+\begin{minted}{cagda}
+-- Auxiliar Helper.
+⊢-inj : ∀ {n Γ} {t : Expr n} → ∀ {τ σ}
+      → Γ ⊢ t ∶ τ
+      → Γ ⊢ t ∶ σ
+      → τ ≡ σ
+
+-- Var case.
+⊢-inj tVar tVar = refl
+
+-- Abstraction case.
+⊢-inj {t = lam τ t} (tLam Γ,τ⊢t:τ′) (tLam Γ,τ⊢t:τ″)
+  = cong (_↣_ τ) (⊢-inj Γ,τ⊢t:τ′ Γ,τ⊢t:τ″)
+
+-- Application case.
+⊢-inj (Γ⊢t₁:τ↣τ₂ ∙ Γ⊢t₂:τ) (Γ⊢t₁:τ₁↣σ ∙ Γ⊢t₂:τ₁)
+  = helper (⊢-inj Γ⊢t₁:τ↣τ₂ Γ⊢t₁:τ₁↣σ)
+  where
+    helper : ∀ {τ τ₂ τ₁ σ} → (τ ↣ τ₂ ≡ τ₁ ↣ σ) → τ₂ ≡ σ
+    helper refl = refl
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Typability I}
+\begin{minted}{cagda}
+infer : ∀ {n} Γ (t : Expr n) → Dec (∃[ τ ] (Γ ⊢ t ∶ τ))
+
+-- Var case.
+infer Γ (var x) = yes (lookup x Γ -and- tVar)
+
+-- Abstraction case.
+infer Γ (lam τ t) with infer (τ ∷ Γ) t
+... | yes (σ -and- Γ,τ⊢t:σ) = yes (τ ↣ σ -and- tLam Γ,τ⊢t:σ)
+... | no  Γ,τ⊬t:σ = no helper
+  where
+    helper : ∄[ τ′ ] (Γ ⊢ lam τ t ∶ τ′)
+    helper (base A -and- ())
+    helper (.τ ↣ σ -and- tLam Γ,τ⊢t:σ)
+      = Γ,τ⊬t:σ (σ -and- Γ,τ⊢t:σ)
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Typability II}
+\begin{minted}{cagda}
+-- Application case part I.
+infer Γ (t₁ ∙ t₂) with infer Γ t₁ | infer Γ t₂
+... | no  ∄τ⟨Γ⊢t₁:τ⟩ | _ = no helper
+    where
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:τ ∙ _)
+        = ∄τ⟨Γ⊢t₁:τ⟩ (_ ↣ τ -and- Γ⊢t₁:τ)
+
+... | yes (base x -and- Γ⊢t₁:base) | _ = no helper
+    where
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:_↣_ ∙ _)
+        with ⊢-inj Γ⊢t₁:_↣_ Γ⊢t₁:base
+      ...  | ()
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Typability III}
+\begin{minted}{cagda}
+-- Application case part II.
+... | yes (τ₁ ↣ τ₂ -and- Γ⊢t₁:τ₁↣τ₂) | no ∄τ⟨Γ⊢t₂:τ⟩ = no helper
+    where
+      helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+      helper (τ -and- Γ⊢t₁:τ₁′↣τ₂′ ∙ Γ⊢t₂:τ)
+        with ⊢-inj Γ⊢t₁:τ₁↣τ₂ Γ⊢t₁:τ₁′↣τ₂′
+      ...  | refl = ∄τ⟨Γ⊢t₂:τ⟩ (τ₁ -and- Γ⊢t₂:τ)
+
+... | yes (τ₁ ↣ τ₂ -and- Γ⊢t₁:τ₁↣τ₂) | yes (τ₁′ -and- Γ⊢t₂:τ₁′)
+    with τ₁ T≟ τ₁′
+...  | yes τ₁≡τ₁′ = yes (τ₂ -and- Γ⊢t₁:τ₁↣τ₂ ∙ helper)
+     where
+       helper : Γ ⊢ t₂  ∶ τ₁
+       helper = subst (_⊢_∶_ Γ t₂) (sym τ₁≡τ₁′) Γ⊢t₂:τ₁′
+...  | no  τ₁≢τ₁′ = no helper
+     where
+       helper : ∄[ σ ] (Γ ⊢ t₁ ∙ t₂ ∶ σ)
+       helper (_ -and- Γ⊢t₁:τ↣τ₂ ∙ Γ⊢t₂:τ₁)
+         with ⊢-inj  Γ⊢t₁:τ↣τ₂ Γ⊢t₁:τ₁↣τ₂
+       ...  | refl = τ₁≢τ₁′ (⊢-inj Γ⊢t₂:τ₁ Γ⊢t₂:τ₁′)
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Type-checking I}
+\begin{minted}{cagda}
+check : ∀ {n} Γ (t : Expr n) → ∀ τ → Dec (Γ ⊢ t ∶ τ)
+
+-- Var case.
+check Γ (var x) τ with lookup x Γ T≟ τ
+... | yes refl = yes tVar
+... | no ¬p    = no (¬p ∘ ⊢-inj tVar)
+
+-- Abstraction case.
+check Γ (lam τ t) (base A) = no (λ ())
+check Γ (lam τ t) (τ₁ ↣ τ₂) with τ₁ T≟ τ
+... | no τ₁≢τ = no (τ₁≢τ ∘ helper)
+    where
+      helper : Γ ⊢ lam τ t ∶ (τ₁ ↣ τ₂) → τ₁ ≡ τ
+      helper (tLam t) = refl
+
+... | yes refl with check (τ ∷ Γ) t τ₂
+...               | yes Γ,τ⊢t:τ₂ = yes (tLam Γ,τ⊢t:τ₂)
+...               | no  Γ,τ⊬t:τ₂ = no helper
+  where
+    helper : ¬ Γ ⊢ lam τ t ∶ τ ↣ τ₂
+    helper (tLam Γ,τ⊢t:_) = Γ,τ⊬t:τ₂ Γ,τ⊢t:_
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]{Type-checking II}
+\begin{minted}{cagda}
+-- Application case.
+check Γ (t₁ ∙ t₂) σ with infer Γ t₂
+... | yes (τ -and- Γ⊢t₂:τ)
+    with check Γ t₁ (τ ↣ σ)
+...    | yes Γ⊢t₁:τ↣σ = yes (Γ⊢t₁:τ↣σ ∙ Γ⊢t₂:τ)
+...    | no  Γ⊬t₁:τ↣σ = no helper
+  where
+    helper : ¬ Γ ⊢ t₁ ∙ t₂ ∶ σ
+    helper (Γ⊢t₁:_↣_ ∙ Γ⊢t₂:τ′)
+      with ⊢-inj Γ⊢t₂:τ Γ⊢t₂:τ′
+    ...  | refl = Γ⊬t₁:τ↣σ Γ⊢t₁:_↣_
+
+check Γ (t₁ ∙ t₂) σ | no Γ⊬t₂:_ = no helper
+  where
+    helper : ¬ Γ ⊢ t₁ ∙ t₂ ∶ σ
+    helper (_∙_ {τ = σ} t Γ⊢t₂:τ′) = Γ⊬t₂:_ (σ -and- Γ⊢t₂:τ′)
+\end{minted}
+\end{frame}
+
+\begin{frame}{References}
+\printbibliography
+\end{frame}
 
 
 \end{document}

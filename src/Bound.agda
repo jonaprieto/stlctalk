@@ -6,8 +6,10 @@ open import Data.Nat    hiding (_≟_)
 open import Data.Fin    using (Fin; #_; suc)
 open import Data.String using (_≟_)
 open import Data.Vec    using (Vec; _∷_; [] )
+
 open import Relation.Nullary.Decidable using ( False )
-open import Syntax Type as S         hiding (Expr; module Expr)
+
+open import Syntax Type as S           hiding (Expr; module Expr)
 
 ------------------------------------------------------------------------------
 
@@ -29,6 +31,7 @@ infixl 5 _,_
 infixl 3 _⊢_⇝_
 
 data _⊢_⇝_ : ∀ {n} → Binder n → S.Expr → Expr n → Set where
+
   var-zero  : ∀ {n x} {Γ : Binder n}
             → Γ , x ⊢ var x ⇝ var (# 0)
 
