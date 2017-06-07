@@ -1,5 +1,5 @@
 name: stlc
-author: Jonathan Prieto-Cubides (based on the entire code of @gergoerdi)
+author: Jonathan Prieto-Cubides
 include:
   - src/
 depend:

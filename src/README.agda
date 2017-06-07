@@ -1,3 +1,7 @@
+-- Disclaimer: this implementation of the simple lambda calculus is a refactor
+-- of the implementation by @gergoerdi (https://github.com/gergoerdi/stlc-agda).
+-- Specifically in the Scopecheck and Typecheck module.
+
 module README where
 
 -- First definition of Typed Lambda Calculus.

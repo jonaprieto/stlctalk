@@ -1,4 +1,4 @@
-\documentclass[10pt, xetex, hyperref={pdfpagelabels=false}]{beamer}
+\documentclass[10pt, xetex, hyperref={pdfpagelabels=false,breaklinks}]{beamer}
 
 % --------------------------------------------------------------------------
 % Packages
@@ -15,6 +15,7 @@
 \usepackage{lmodern}
 
 \usepackage{url}
+
 
 % --------------------------------------------------------------------------
 % Tikz Configuration
@@ -145,7 +146,8 @@
   , natbib=true
   , sortlocale=en_US
   , style=authoryear-icomp
-  , url=false
+  , url=true
+  , block=ragged
 ]{biblatex}
 \addbibresource{ref.bib}
 \renewcommand*{\nameyeardelim}{\addcomma\addspace}
@@ -193,11 +195,11 @@ Medell\'in, Colombia}
 \item The Agda source code of this talk is available in the repository
 {\color{plum}
 \begin{center}
-\href{https://github.com/jonaprieto/stlctalk}{https://github.com/jonaprieto/stlctalk}
+\href{https://github.com/jonaprieto/stlctalk}{https://github.com/jonaprieto/stlctalk}.
 \end{center}
 }
-and it was mostly based on the implementation by \citep{cactus} and \citep{nad} of
-the simple lambda calculus
+We present a refactor of the implementation by \citep{cactus} for the simple lambda calculus,
+specifically in the Scopecheck and Typecheck module.
 \item Tested with Agda v$2.5.2$ and Agda Standard Library v$0.13$
 \end{itemize}
 \end{frame}
