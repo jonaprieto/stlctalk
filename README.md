@@ -11,7 +11,7 @@ with some of its properties and a description of the type-checking for this type
 - Lambda Calculus
 - Typed Lambda Calculus
 - Syntax Definitions
-- Decibility of Type Assignment
+- Decidability of Type Assignment
 - Well-Scoped Lambda Expressions
 - Typability
 - Type-checking
