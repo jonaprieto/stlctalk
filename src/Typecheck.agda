@@ -1,5 +1,5 @@
-open import Relation.Binary
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary using (IsDecEquivalence)
+open import Relation.Binary.PropositionalEquality using (_≡_; subst)
 
 module Typecheck {U : Set} (UEq : IsDecEquivalence {A = U} _≡_) where
 
@@ -11,10 +11,10 @@ open import Typing U
   using (Type; base; _↣_; _⊢_∶_; Ctxt; tVar; tLam; _∙_)
 open import Bound Type
 
-open import Data.Nat         hiding (_≟_)
-open import Data.Product     renaming (_,_ to _-and-_)
-open import Data.Product     using (∃; ∄)
-open import Data.Vec         using (Vec; _∷_; lookup)
+open import Data.Nat      hiding (_≟_)
+open import Data.Product  hiding (∃-syntax; ∄-syntax) renaming (_,_ to _-and-_)
+open import Data.Product  using (∃; ∄)
+open import Data.Vec      using (Vec; _∷_; lookup)
 
 open import Function         using (_∘_; _$_)
 open import Relation.Binary.PropositionalEquality

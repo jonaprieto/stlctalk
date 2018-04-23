@@ -6,7 +6,7 @@ open import Bound Type
 
 open import Data.Fin     using (Fin; suc; #_)
 open import Data.Nat     hiding (_≟_)
-open import Data.Product renaming (_,_ to _-and-_)
+open import Data.Product hiding (∃-syntax; ∄-syntax) renaming (_,_ to _-and-_)
 open import Data.Product using (∃; ∄)
 open import Data.String  using (_≟_)
 open import Data.Sum     using (_⊎_; inj₁ ; inj₂)

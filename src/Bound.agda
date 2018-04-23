@@ -5,9 +5,9 @@ module Bound (Type : Set) where
 open import Data.Nat    hiding (_≟_)
 open import Data.Fin    using (Fin; #_; suc)
 open import Data.String using (_≟_)
-open import Data.Vec    using (Vec; _∷_; [] )
+open import Data.Vec    using (Vec; _∷_; [])
 
-open import Relation.Nullary.Decidable using ( False )
+open import Relation.Nullary.Decidable using (False)
 
 open import Syntax Type as S           hiding (Expr; module Expr)
 

@@ -2,7 +2,7 @@ module Utils where
 
 ------------------------------------------------------------------------------
 
-open import Data.Product using (∃; ∄)
+open import Data.Product  hiding (∃-syntax; ∄-syntax)
 
 ------------------------------------------------------------------------------
 
