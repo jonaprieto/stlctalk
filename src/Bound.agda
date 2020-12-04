@@ -48,29 +48,31 @@ data _⊢_⇝_ : ∀ {n} → Binder n → S.Expr → Expr n → Set where
             → Γ ⊢ t₂ ⇝ t₂′
             → Γ ⊢ t₁ ∙ t₂ ⇝ t₁′ ∙ t₂′
 
--- ∅ : Binder 0
--- ∅ = []
 
--- Γ : Binder 2
--- Γ = [] , "x" , "y"
+private
+  ∅ : Binder 0
+  ∅ = []
 
--- e1 : Γ ⊢ var "x" ⇝ var (# 1)
--- e1 = var-suc var-zero
+  Γ : Binder 2
+  Γ = [] , "x" , "y"
 
--- postulate A : Type
+  e1 : Γ ⊢ var "x" ⇝ var (# 1)
+  e1 = var-suc var-zero
 
--- I : [] ⊢ lam ("x" ∶ A) (var "x")
---        ⇝ lam A (var (# 0))
--- I = lam var-zero
+  postulate A : Type
 
--- K : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "x"))
---        ⇝ lam A (lam A (var (# 1)))
--- K = lam (lam (var-suc var-zero))
+  I : [] ⊢ lam ("x" ∶ A) (var "x")
+        ⇝ lam A (var (# 0))
+  I = lam var-zero
 
--- K₂ : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "y"))
---         ⇝ lam A (lam A (var (# 0)))
--- K₂ = lam (lam var-zero)
+  K : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "x"))
+        ⇝ lam A (lam A (var (# 1)))
+  K = lam (lam (var-suc var-zero))
 
--- P : Γ ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (lam ("z" ∶ A) (var "x")))
---        ⇝ lam A (lam A (lam A (var (# 2))))
--- P = {!!}
+  K₂ : [] ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (var "y"))
+          ⇝ lam A (lam A (var (# 0)))
+  K₂ = lam (lam var-zero)
+
+  -- P : Γ ⊢ lam ("x" ∶ A) (lam ("y" ∶ A) (lam ("z" ∶ A) (var "x")))
+  --        ⇝ lam A (lam A (lam A (var (# 2))))
+  -- P = {!!}

@@ -68,7 +68,7 @@ base A T≟ (_ ↣ _) = no (λ ())
 infer : ∀ {n} Γ (t : Expr n) → Dec (∃[ τ ] (Γ ⊢ t ∶ τ))
 
 -- Var case.
-infer Γ (var x) = yes (lookup x Γ -and- tVar)
+infer Γ (var x) = yes (lookup Γ x -and- tVar)
 
 -- Abstraction case.
 infer Γ (lam τ t) with infer (τ ∷ Γ) t
@@ -118,7 +118,7 @@ infer Γ (t₁ ∙ t₂) with infer Γ t₁ | infer Γ t₂
 check : ∀ {n} Γ (t : Expr n) → ∀ τ → Dec (Γ ⊢ t ∶ τ)
 
 -- Var case.
-check Γ (var x) τ with lookup x Γ T≟ τ
+check Γ (var x) τ with lookup Γ x T≟ τ
 ... | yes refl = yes tVar
 ... | no ¬p    = no (¬p ∘ ⊢-inj tVar)
 

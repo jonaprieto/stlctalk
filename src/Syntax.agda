@@ -20,24 +20,25 @@ data Expr : Set where
 infixl 20 _∙_
 
 -- -- Examples.
--- postulate A : Type
+private
+  postulate A : Type
 
--- x = var "x"
--- y = var "y"
--- z = var "z"
+  x = var "x"
+  y = var "y"
+  z = var "z"
 
--- -- λx.x
--- I : Expr
--- I = lam ("x" ∶ A) x
+  -- λx.x
+  I : Expr
+  I = lam ("x" ∶ A) x
 
--- -- λxy.x
--- K : Expr
--- K = lam ("x" ∶ A) (lam ("y" ∶ A) x)
+  -- λxy.x
+  K : Expr
+  K = lam ("x" ∶ A) (lam ("y" ∶ A) x)
 
--- -- λxyz.xz(yz)
--- S : Expr
--- S =
---   lam ("x" ∶ A)
---     (lam ("y" ∶ A)
---       (lam ("z" ∶ A)
---         ((x ∙ z) ∙ (y ∙ z))))
+  -- λxyz.xz(yz)
+  S : Expr
+  S =
+    lam ("x" ∶ A)
+      (lam ("y" ∶ A)
+        (lam ("z" ∶ A)
+          ((x ∙ z) ∙ (y ∙ z))))

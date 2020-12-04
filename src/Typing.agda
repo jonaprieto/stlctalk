@@ -23,7 +23,7 @@ infixl 20 _,_
 
 data _⊢_∶_ : ∀ {n} → Ctxt n → Expr n → Type → Set where
   tVar : ∀ {n Γ} {x : Fin n}
-       → Γ ⊢ var x ∶ lookup x Γ
+       → Γ ⊢ var x ∶ lookup Γ x
 
   tLam : ∀ {n} {Γ : Ctxt n} {t} {τ τ′}
        → Γ , τ ⊢ t ∶ τ′
@@ -40,30 +40,31 @@ infixl 20 _⊢_∶_
 
 -- Examples
 
--- postulate
---   Bool : Type
+private
+     postulate
+      Bool : Type
 
--- ex : [] , Bool ⊢ var (# 0) ∶ Bool
--- ex = tVar
+     ex : [] , Bool ⊢ var (# 0) ∶ Bool
+     ex = tVar
 
--- ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ↣ Bool
--- ex2 = tLam tVar
+     ex2 : [] ⊢ lam Bool (var (# 0)) ∶ Bool ↣ Bool
+     ex2 = tLam tVar
 
--- postulate
---   Word : Type
---   Num  : Type
+     postulate
+      Word : Type
+      Num  : Type
 
--- K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ↣ Num ↣ Word
--- K = tLam (tLam tVar)
+     K : [] ⊢ lam Word (lam Num (var (# 1))) ∶ Word ↣ Num ↣ Word
+     K = tLam (tLam tVar)
 
--- postulate
---   A : Type
---   B : Type
---   C : Type
+     postulate
+      A : Type
+      B : Type
+      C : Type
 
--- S : [] ⊢ lam (A ↣ (B ↣ C))
---              (lam (A ↣ B)
---                   (lam A
---                     ((var (# 2)) ∙ (var (# 0))) ∙ ((var (# 1)) ∙ (var (# 0))) ))
---        ∶ (A ↣ (B ↣ C)) ↣ (A ↣ B) ↣ A ↣ C
--- S = {!!} --  tLam (tLam (tLam ((tVar ∙ tVar) ∙ (tVar ∙ tVar))))
+     S : [] ⊢ lam (A ↣ (B ↣ C))
+               (lam (A ↣ B)
+                    (lam A
+                         ((var (# 2)) ∙ (var (# 0))) ∙ ((var (# 1)) ∙ (var (# 0))) ))
+          ∶ (A ↣ (B ↣ C)) ↣ (A ↣ B) ↣ A ↣ C
+     S = tLam (tLam ({!   !} ∙ (tVar ∙ {!  !}))) -- (tLam (tLam ((tVar ∙ tVar) ∙ (tVar ∙ tVar))))

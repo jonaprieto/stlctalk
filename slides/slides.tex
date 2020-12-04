@@ -1,4 +1,4 @@
-\documentclass[10pt, xetex, hyperref={pdfpagelabels=false,breaklinks}]{beamer}
+\documentclass[10pt, xelatex, hyperref={pdfpagelabels=false,breaklinks}]{beamer}
 
 % --------------------------------------------------------------------------
 % Packages
@@ -355,7 +355,7 @@ Type checking for $\lambda\rightarrow$ is decidable.
 $$  λx. λy. x ⇝  λ λ 2$$
 \item The natural number denotes the number of binders that are in scope between that occurrence and its corresponding binder
 $$λx. λy. λz. x z (y z)  ⇝ λ λ λ 3 1 (2 1)$$
-\item Check for $α$-equivalence is the same as that for syntactic equality
+\item $α$-equivalence is then syntactic equality
 \item A syntax definition using De Bruijn indexes\\[3mm]
 \begin{minted}{cagda}
 data Expr (n : ℕ) : Set where
